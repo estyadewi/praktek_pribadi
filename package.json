@@ -1,0 +1,31 @@
+{
+  "name": "praktek_fe",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@nextui-org/react": "^2.4.6",
+    "dompurify": "^3.1.7",
+    "framer-motion": "^11.5.4",
+    "js-cookie": "^3.0.5",
+    "next": "^14.2.7",
+    "quill": "^2.0.2",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hot-toast": "^2.4.1",
+    "react-icons": "^5.3.0",
+    "react-quill": "^2.0.0",
+    "react-to-print": "^2.15.1"
+  },
+  "devDependencies": {
+    "eslint": "^8",
+    "eslint-config-next": "14.2.7",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1"
+  }
+}
