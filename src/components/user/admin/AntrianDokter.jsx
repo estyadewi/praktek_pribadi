@@ -10,7 +10,7 @@ import { getPasienReadyToDokter } from "@/services/antrian";
 export const AntrianDokterAdminPage = () => {
     const [pasien, setPasien] = useState([]);
     const [dokter, setDokter] = useState([]);
-    const [selectedDokter, setSelectedDokter] = useState(1);
+    const [selectedDokter, setSelectedDokter] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -46,20 +46,21 @@ export const AntrianDokterAdminPage = () => {
         try {
             const res = await getDokterTersedia();
             setDokter(res);
+            setSelectedDokter(res[0]?.id || null); 
         } catch (error) {
-            return error;
+            console.error(error);
         } finally {
             setLoading(false);
         }
     }
 
-    const fetchPasien = async () => {
+    const fetchPasien = async (dokterId) => {
         setLoading(true);
         try {
-            const res = await getPasienReadyToDokter(selectedDokter);
+            const res = await getPasienReadyToDokter(dokterId);
             setPasien(res);
         } catch (error) {
-            return error;
+            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -74,7 +75,9 @@ export const AntrianDokterAdminPage = () => {
     }, []);
 
     useEffect(() => {
-        fetchPasien();
+        if (selectedDokter) {
+            fetchPasien(selectedDokter);
+        }
     }, [selectedDokter]);
 
     return (
@@ -131,12 +134,12 @@ export const AntrianDokterAdminPage = () => {
                         <select
                             name="dokter"
                             id="dokter"
-                            value={selectedDokter}
+                            value={selectedDokter || ""}
                             onChange={handleChangeDokter}
                             className="h-10 w-full md:w-64 rounded-md border-r-8 border-transparent px-3 text-sm outline-1 outline outline-slate-200 shadow-sm hover:outline-slate-400 focus:outline-slate-400 focus:shadow-outline-slate-200"
                         >
-                            {dokter.map((item, index) => (
-                                <option key={index} value={item.id}>dr. {item.nama} (Spesialis {item.spesialisasi})</option>
+                            {dokter.map((item) => (
+                                <option key={item.id} value={item.id}>dr. {item.nama} (Spesialis {item.spesialisasi})</option>
                             ))}
                         </select>
                     </div>

@@ -40,7 +40,7 @@ export const ObatPage = () => {
             const res = await getAllObat();
             setData(res);
         } catch (error) {
-            console.error("Failed to fetch data", error);
+           return error;
         } finally {
             setLoading(false);
         }

@@ -36,7 +36,6 @@ export const GantiPasswordForm = () => {
         Cookies.remove("verify-token");
         router.push("/masuk");
       } else {
-        console.log(res.error);
         if (res.error instanceof Object) {
           for (const key in res.error) {
             toast.error(res.error[key]);

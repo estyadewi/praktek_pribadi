@@ -99,10 +99,11 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien }) => {
   }, []);
 
   useEffect(() => {
-    if (selectedDokter || data.tanggal_pemeriksaan) {
-      fetchSesi();
+    if (selectedDokter && data.tanggal_pemeriksaan) {
+        fetchSesi();
     }
-  }, [selectedDokter, data.tanggal_pemeriksaan]);
+}, [selectedDokter, data.tanggal_pemeriksaan]);
+
 
   const handleModalClose = (openStatus) => {
     if (openStatus === false) {

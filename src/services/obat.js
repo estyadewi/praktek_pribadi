@@ -43,8 +43,6 @@ export async function addObat(data) {
 export async function addStokObat(stok, id) {
     try {
         const token = Cookies.get("auth-token");
-        console.log(stok);
-        console.log(id)
         const response = await fetch(`${API_URL}/obat/stok/${id}`, {
         method: "PUT",
         headers: {

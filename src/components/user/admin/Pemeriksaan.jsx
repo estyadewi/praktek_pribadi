@@ -11,7 +11,7 @@ import { getPasienHaveNoAntrian } from "@/services/pemeriksaan";
 export const PemeriksaanAdminPage = () => {
     const [pasien, setPasien] = useState([]);
     const [dokter, setDokter] = useState([]);
-    const [selectedDokter, setSelectedDokter] = useState(1);
+    const [selectedDokter, setSelectedDokter] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -47,20 +47,21 @@ export const PemeriksaanAdminPage = () => {
         try {
             const response = await getDokterTersedia();
             setDokter(response);
+            setSelectedDokter(response[0]?.id || null);
         } catch (error) {
-            return error;
+            console.error(error);
         } finally {
             setLoading(false);
         }
     }
 
-    const fetchPasien = async () => {
+    const fetchPasien = async (dokterId) => {
         setLoading(true);
         try {
-            const response = await getPasienHaveNoAntrian(selectedDokter);
+            const response = await getPasienHaveNoAntrian(dokterId);
             setPasien(response);
         } catch (error) {
-            return error;
+            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -71,7 +72,9 @@ export const PemeriksaanAdminPage = () => {
     }, []);
 
     useEffect(() => {
-        fetchPasien();
+        if (selectedDokter) {
+            fetchPasien(selectedDokter);
+        }
     }, [selectedDokter]);
 
     const handleChangeDokter = (e) => {
@@ -132,12 +135,12 @@ export const PemeriksaanAdminPage = () => {
                         <select
                             name="dokter"
                             id="dokter"
-                            value={selectedDokter}
+                            value={selectedDokter || ""}
                             onChange={handleChangeDokter}
                             className="h-10 w-full md:w-64 rounded-md border-r-8 border-transparent px-3 text-sm outline-1 outline outline-slate-200 shadow-sm hover:outline-slate-400 focus:outline-slate-400 focus:shadow-outline-slate-200"
                         >
-                            {dokter.map((item, index) => (
-                                <option key={index} value={item.id}>dr. {item.nama} (Spesialis {item.spesialisasi})</option>
+                            {dokter.map((item) => (
+                                <option key={item.id} value={item.id}>dr. {item.nama} (Spesialis {item.spesialisasi})</option>
                             ))}
                         </select>
                     </div>
@@ -191,5 +194,5 @@ export const PemeriksaanAdminPage = () => {
                 </div>
             </div>
         </div>
-    )
+    );
 }
