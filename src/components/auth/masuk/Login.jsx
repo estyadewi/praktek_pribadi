@@ -5,7 +5,7 @@ import { Input } from "@nextui-org/react";
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { login, cekToken } from "@/services/auth";
+import { login, cekToken, regenerateOTP } from "@/services/auth";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
@@ -48,6 +48,7 @@ export const LoginForm = () => {
         if(res.message === "Akun belum aktif"){
           toast.error(res.message);
           Cookies.set("activation-token", res.token);
+          await regenerateOTP("all");
           router.push("/aktivasi-akun?otp=all");
         } else {
           Cookies.set("auth-token", res.token);
