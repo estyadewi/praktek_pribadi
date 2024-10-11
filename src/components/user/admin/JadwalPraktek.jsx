@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Breadcrumbs,
   BreadcrumbItem,
@@ -23,9 +23,9 @@ import { FaHome, FaSearch, FaCalendarAlt } from "react-icons/fa";
 import {
   getJadwalHarianByDokter,
   getJadwalDadakanByDokter,
+  getDokterTersedia,
 } from "@/services/jadwal-praktek";
 import { formatDate, calculateTotalKuota } from "@/lib/constants";
-import { getDokterTersedia } from "@/services/jadwal-praktek";
 import { ModalHapusJadwalDadakan } from "@/components/modal/jadwal-praktek/Modal-hapus-jadwal-dadakan";
 import Link from "next/link";
 
@@ -62,44 +62,43 @@ export const JadwalPraktekPage = () => {
     return filteredJadwalDadakan.slice(start, end);
   }, [pageDadakan, filteredJadwalDadakan]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getJadwalHarianByDokter(dokterSelected);
-      const response = await getJadwalDadakanByDokter(dokterSelected);
-      setData(res);
-      setJadwalDadakan(response);
+      const [jadwalHarian, jadwalD] = await Promise.all([
+        getJadwalHarianByDokter(dokterSelected),
+        getJadwalDadakanByDokter(dokterSelected),
+      ]);
+      setData(jadwalHarian);
+      setJadwalDadakan(jadwalD);
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [dokterSelected]);
 
-  const fetchDokter = async () => {
+  const fetchDokter = useCallback(async () => {
     try {
       const response = await getDokterTersedia();
       setDokterTersedia(response);
+      if (response.length > 0) {
+        setDokterSelected(response[0].id);
+      }
     } catch (error) {
       console.error(error);
     }
-  };
-
-  useEffect(() => {
-    fetchDokter();
   }, []);
 
   useEffect(() => {
-    if (dokterTersedia.length > 0) {
-      setDokterSelected(dokterTersedia[0].id);
-    }
-  }, [dokterTersedia]);
+    fetchDokter();
+  }, [fetchDokter]);
 
   useEffect(() => {
     if (dokterSelected) {
       fetchData();
     }
-  }, [dokterSelected]);
+  }, [dokterSelected, fetchData]);
 
   useEffect(() => {
     if (pageDadakan > pagesDadakan && pagesDadakan > 0) {
@@ -150,13 +149,14 @@ export const JadwalPraktekPage = () => {
             <option value="" disabled>
               Pilih Dokter
             </option>
-            {dokterTersedia.map((item, index) => (
-              <option key={index} value={item.id}>
-                dr. {item.nama} (Spesialis {item.spesialisasi})
+            {dokterTersedia.map(({ id, nama, spesialisasi }) => (
+              <option key={id} value={id}>
+                dr. {nama} (Spesialis {spesialisasi})
               </option>
             ))}
           </select>
         </div>
+
         <div className="mt-2">
           <h1 className="mb-1 font-semibold text-slate-700">
             Jadwal Praktek Harian
@@ -183,12 +183,12 @@ export const JadwalPraktekPage = () => {
                 items={data}
                 emptyContent={"Tidak Ada Jadwal Praktek"}
               >
-                {data.map((item, index) => (
-                  <TableRow key={item.id}>
+                {data.map(({ id, hari, sesi }, index) => (
+                  <TableRow key={id}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{getKeyValue(item, "hari")}</TableCell>
-                    <TableCell>{item.sesi.length}</TableCell>
-                    <TableCell>{calculateTotalKuota(item)}</TableCell>
+                    <TableCell>{getKeyValue({ hari }, "hari")}</TableCell>
+                    <TableCell>{sesi.length}</TableCell>
+                    <TableCell>{calculateTotalKuota({ hari, sesi })}</TableCell>
                     <TableCell>
                       <Tooltip
                         placement="top"
@@ -196,7 +196,7 @@ export const JadwalPraktekPage = () => {
                         content="Ubah Jadwal Praktek"
                       >
                         <Link
-                          href={`/admin/jadwal-praktek/${item.hari}/ubah-jadwal?idDokter=${dokterSelected}`}
+                          href={`/admin/jadwal-praktek/${hari}/ubah-jadwal?idDokter=${dokterSelected}`}
                         >
                           <button className="p-2 bg-orange-500 rounded hover:opacity-80">
                             <FaCalendarAlt className="text-white" />
@@ -246,20 +246,13 @@ export const JadwalPraktekPage = () => {
                     onChange={handleSearch}
                   />
                 </div>
-                <div className="w-full">
-                  <Button
-                    href={`/admin/jadwal-praktek/perubahan-jadwal?idDokter=${dokterSelected}`}
-                    as={Link}
-                    color="success"
-                    className="text-white w-full"
-                    radius="sm"
-                  >
-                    Perubahan Jadwal
-                  </Button>
-                </div>
               </div>
             </CardBody>
           </Card>
+
+          <h1 className="mb-1 font-semibold text-slate-700">
+            Jadwal Praktek Dadakan
+          </h1>
           {loading ? (
             <div className="flex justify-center items-center min-h-[222px]">
               <Spinner size="lg" />
@@ -267,19 +260,6 @@ export const JadwalPraktekPage = () => {
           ) : (
             <Table
               aria-label="Tabel Jadwal Praktek Dadakan"
-              bottomContent={
-                <div className="flex w-full justify-center">
-                  <Pagination
-                    isCompact
-                    showControls
-                    showShadow
-                    color="primary"
-                    page={pageDadakan}
-                    total={pagesDadakan}
-                    onChange={(page) => setPageDadakan(page)}
-                  />
-                </div>
-              }
               classNames={{
                 wrapper: "min-h-[360px]",
               }}
@@ -288,43 +268,37 @@ export const JadwalPraktekPage = () => {
                 <TableColumn>No</TableColumn>
                 <TableColumn>Tanggal</TableColumn>
                 <TableColumn>Hari</TableColumn>
-                <TableColumn>Slot</TableColumn>
-                <TableColumn>Kuota</TableColumn>
                 <TableColumn>Aksi</TableColumn>
               </TableHeader>
               <TableBody
                 items={itemsDadakan}
                 emptyContent={"Tidak Ada Jadwal Praktek Dadakan"}
               >
-                {itemsDadakan.map((item, index) => (
-                  <TableRow key={item.id}>
+                {itemsDadakan.map(({ id, tanggal, hari }, index) => (
+                  <TableRow key={id}>
+                    <TableCell>{(pageDadakan - 1) * rowsPerPage + index + 1}</TableCell>
+                    <TableCell>{formatDate(tanggal)}</TableCell>
+                    <TableCell>{hari}</TableCell>
                     <TableCell>
-                      {(pageDadakan - 1) * rowsPerPage + index + 1}
-                    </TableCell>
-                    <TableCell>{formatDate(item.tanggal)}</TableCell>
-                    <TableCell>{getKeyValue(item, "hari")}</TableCell>
-                    <TableCell>{item.sesi.length}</TableCell>
-                    <TableCell>{calculateTotalKuota(item)}</TableCell>
-                    <TableCell className="flex flex-row space-x-2 md:space-y-0">
-                      <Tooltip
-                        placement="top"
-                        showArrow
-                        content={"Ubah Jadwal Dadakan"}
-                      >
-                        <Link
-                          href={`/admin/jadwal-praktek/${item.tanggal}/ubah-perubahan-jadwal?idDokter=${dokterSelected}`}
-                        >
-                          <button className="p-2 bg-orange-500 rounded hover:opacity-80">
-                            <FaCalendarAlt className="text-white" />
-                          </button>
-                        </Link>
-                      </Tooltip>
-                      <ModalHapusJadwalDadakan id={item.id} fetch={fetchData} />
+                      <ModalHapusJadwalDadakan
+                        id={id}
+                        tanggal={tanggal}
+                        refresh={fetchData}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+          )}
+
+          {pagesDadakan > 1 && (
+            <Pagination
+              total={pagesDadakan}
+              page={pageDadakan}
+              onPageChange={setPageDadakan}
+              className="mt-2"
+            />
           )}
         </div>
       </div>
