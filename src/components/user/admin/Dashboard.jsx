@@ -210,11 +210,11 @@ export const DashboardAdmin = () => {
                   <TableCell className="flex flex-row space-x-2 md:space-y-0">
                     <ModalBeriAntrian
                       idPemeriksaan={item.id}
-                      fetch={fetchPasien}
+                      fetch={fetchDashboardData}
                     />
                     <ModalAdminBatalJanjiPasien
                       idPemeriksaan={item.id}
-                      fetch={fetchPasien}
+                      fetch={fetchDashboardData}
                     />
                   </TableCell>
                 </TableRow>

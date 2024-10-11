@@ -100,12 +100,7 @@ export const ModalSuratKeteranganSakit = ({ data }) => {
                       radius="sm"
                       className="bg-white"
                       onChange={handleChange}
-                      min={new Intl.DateTimeFormat("en-CA", {
-                        timeZone: "Asia/Jakarta",
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      }).format(new Date())}
+                      min={tanggal.tanggal_mulai}
                       classNames={{
                         inputWrapper: "border",
                       }}
