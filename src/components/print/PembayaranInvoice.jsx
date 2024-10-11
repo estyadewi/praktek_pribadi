@@ -6,6 +6,7 @@ import { Tooltip } from "@nextui-org/react";
 
 export const PembayaranInvoice = ({ data }) => {
   const componentRef = useRef();
+  const printButtonRef = useRef();
   const today = new Date();
   const year = today.getFullYear().toString().slice(-2);
   const month = String(today.getMonth() + 1).padStart(2, "0");
@@ -13,20 +14,37 @@ export const PembayaranInvoice = ({ data }) => {
   const queueNumber = String(data.nomor_antrian).padStart(4, "0");
 
   const invoiceNo = `${day}${month}${year}${queueNumber}`;
+
+  const handlePrint = () => {
+    if (printButtonRef.current) {
+      printButtonRef.current.click();
+    }
+  };
+
   return (
     <div>
       <ReactToPrint
         trigger={() => (
-          <Tooltip placement="top" showArrow content={"Cetak Invoice"}>
-            <button className="bg-red-500 p-2 rounded hover:bg-red-600 flex items-center">
-              <IoMdPrint className="text-white" />
-            </button>
-          </Tooltip>
+          <button ref={printButtonRef} style={{ display: 'none' }}>
+            Print
+          </button>
         )}
         content={() => componentRef.current}
         documentTitle="Invoice Praktek dr. Estya Dewi W. ,SpOG"
         pageStyle="@page { size: 148mm 210mm; margin: 2.54cm; }"
       />
+      <Tooltip 
+        content="Cetak Invoice" 
+        placement="top" 
+        showArrow
+      >
+        <button 
+          onClick={handlePrint}
+          className="bg-red-500 p-2 rounded hover:bg-red-600 flex items-center"
+        >
+          <IoMdPrint className="text-white" />
+        </button>
+      </Tooltip>
       <div className="overflow-hidden h-0 w-0">
         <div ref={componentRef}>
           <div className="flex flex-col justify-center items-center text-center">

@@ -5,6 +5,7 @@ import { Tooltip } from "@nextui-org/react";
 
 export const ResepInvoice = ({ data }) => {
   const componentRef = useRef();
+  const printButtonRef = useRef();
   const today = new Date();
 
   const formatDate = today.toLocaleDateString("id-ID", {
@@ -27,20 +28,32 @@ export const ResepInvoice = ({ data }) => {
     return age;
   }
 
+  const handlePrint = () => {
+    if (printButtonRef.current) {
+      printButtonRef.current.click();
+    }
+  };
+
   return (
     <div>
       <ReactToPrint
         trigger={() => (
-          <Tooltip placement="top" showArrow content={"Cetak Resep"}>
-            <button className="bg-orange-500 p-2 rounded hover:opacity-80 flex items-center">
-              <IoReceipt className="text-white" />
-            </button>
-          </Tooltip>
+          <button ref={printButtonRef} style={{ display: "none" }}>
+            Print
+          </button>
         )}
         content={() => componentRef.current}
         documentTitle="Invoice Praktek dr. Estya Dewi W. ,SpOG"
         pageStyle="@page { size: 148mm 210mm; margin: 2.54cm; }"
       />
+      <Tooltip placement="top" showArrow content={"Cetak Resep"}>
+        <button
+          onClick={handlePrint}
+          className="bg-orange-500 p-2 rounded hover:opacity-80 flex items-center"
+        >
+          <IoReceipt className="text-white" />
+        </button>
+      </Tooltip>
       <div className="overflow-hidden h-0 w-0">
         <div ref={componentRef}>
           <div className="flex flex-col justify-center items-center text-center">

@@ -20,7 +20,7 @@ import {
   FaCommentDollar,
 } from "react-icons/fa";
 import { MdFactCheck } from "react-icons/md";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import CounterCard from "@/components/Card/CounterCard";
 import { ModalBeriAntrian } from "@/components/modal/beri-antrian/Modal-beri-antrian";
 import { getDokterTersedia } from "@/services/jadwal-praktek";
@@ -36,7 +36,6 @@ export const DashboardAdmin = () => {
   const [totalKuota, setTotalKuota] = useState(0);
   const [totalPembayaran, setTotalPembayaran] = useState(0);
   const [sisaAntrian, setSisaAntrian] = useState(0);
-
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const rowsPerPage = 5;
@@ -44,58 +43,50 @@ export const DashboardAdmin = () => {
   const pages = Math.ceil((users?.length || 0) / rowsPerPage);
 
   const items = useMemo(() => {
-    if (!users || users.length === 0) return [];
     const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-
-    return users.slice(start, end);
+    return users.slice(start, start + rowsPerPage);
   }, [page, users]);
 
   const fetchDokter = async () => {
     try {
       const res = await getDokterTersedia();
       setDokter(res);
-      setSelectedDokter(res[0].id);
+      setSelectedDokter(res[0]?.id || 0);
     } catch (error) {
-      return error;
+      console.error(error);
     }
   };
 
-  const fetchPasien = async () => {
+  const fetchDashboardData = async () => {
     try {
-      const res = await getJadwalTemuDokter(selectedDokter);
-      setUsers(res);
+      setLoading(true);
+      const [pasienRes, dashboardRes] = await Promise.all([
+        getJadwalTemuDokter(selectedDokter),
+        getDashboardAdmin(selectedDokter),
+      ]);
+      setUsers(pasienRes);
+      setTotalSlot(dashboardRes.total_slot);
+      setTotalKuota(dashboardRes.total_kuota);
+      setTotalPembayaran(dashboardRes.pembayaran_selesai);
+      setSisaAntrian(dashboardRes.sisa_antrian);
     } catch (error) {
+      console.error(error);
       setUsers([]);
-      return error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchDashboard = async () => {
-    try {
-      const res = await getDashboardAdmin(selectedDokter);
-      setTotalSlot(res.total_slot);
-      setTotalKuota(res.total_kuota);
-      setTotalPembayaran(res.pembayaran_selesai);
-      setSisaAntrian(res.sisa_antrian);
-    } catch (error) {
-      return error;
-    }
-  };
-
-  const handleChangeDokter = (e) => {
+  const handleChangeDokter = useCallback((e) => {
     setSelectedDokter(e.target.value);
-  };
+  }, []);
 
   useEffect(() => {
     fetchDokter();
   }, []);
 
   useEffect(() => {
-    setLoading(true);
-    fetchPasien();
-    fetchDashboard();
-    setLoading(false);
+    if (selectedDokter) fetchDashboardData();
   }, [selectedDokter]);
 
   return (
@@ -133,6 +124,7 @@ export const DashboardAdmin = () => {
           ))}
         </select>
       </div>
+
       {loading ? (
         <div className="mt-3 grid grid-flow-row lg:grid-cols-4 gap-4">
           <SkeletonCounterCard />
