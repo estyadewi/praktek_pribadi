@@ -39,7 +39,7 @@ export const LoginForm = () => {
             Cookies.set("activation-token", res.token);
             await regenerateOTP("all");
             toast.success("OTP telah dikirim");
-            router.push("/aktivasi-akun");
+            router.push("/aktivasi-akun?otp=all");
           } else {
             const existingToken = Cookies.get("auth-token");
             if (existingToken) {
