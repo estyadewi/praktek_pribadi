@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Breadcrumbs, BreadcrumbItem, Card, CardBody, Input, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, getKeyValue, Spinner } from "@nextui-org/react";
 import { FaHome, FaSearch } from "react-icons/fa";
 import { getHistoryObatMasuk, getHistoryObatKeluar } from "@/services/riwayat-obat";
@@ -55,22 +55,23 @@ export const RiwayatObatPage = () => {
         return filteredObatKeluar.slice(start, end);
     }, [pageKeluar, filteredObatKeluar]);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const [dataMasuk, dataKeluar] = await Promise.all([getHistoryObatMasuk(), getHistoryObatKeluar()]);
-            setObatMasuk(dataMasuk);
-            setObatKeluar(dataKeluar);
+            const resMasuk = await getHistoryObatMasuk();
+            setObatMasuk(resMasuk);
+            const resKeluar = await getHistoryObatKeluar();
+            setObatKeluar(resKeluar);
         } catch (error) {
             console.error("Failed to fetch data", error);
         } finally {
             setLoading(false);
         }
-    }, []);
+    };
 
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
+    }, []);
 
     useEffect(() => {
         if (pageMasuk > pagesMasuk && pagesMasuk > 0) {

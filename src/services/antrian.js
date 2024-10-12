@@ -1,3 +1,5 @@
+"use server";
+
 import { API_URL } from "@/lib/constants";
 import Cookies from "js-cookie";
 

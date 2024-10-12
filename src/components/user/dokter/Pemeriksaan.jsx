@@ -28,7 +28,7 @@ export const PemeriksaanDokterPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false); // New state for navigation
   const rowsPerPage = 5;
 
   const fetchData = useCallback(async () => {
@@ -49,7 +49,7 @@ export const PemeriksaanDokterPage = () => {
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
-    setPage(1);
+    setPage(1); // Reset page when searching
   };
 
   const filteredData = useMemo(() => {
@@ -77,7 +77,7 @@ export const PemeriksaanDokterPage = () => {
     setTimeout(() => {
       setIsNavigating(false);
       toast.dismiss(loadingToast);
-    }, 2000); 
+    }, 1000); 
   };
 
   return (
@@ -157,7 +157,7 @@ export const PemeriksaanDokterPage = () => {
                     color="primary"
                     page={page}
                     total={pages}
-                    onChange={setPage}
+                    onChange={setPage} // Directly setting page here
                   />
                 </div>
               }
@@ -186,7 +186,7 @@ export const PemeriksaanDokterPage = () => {
                         >
                           <button
                             className="p-2 bg-orange-500 rounded hover:opacity-80"
-                            onClick={handleLoading}
+                            onClick={handleLoading} // Call handleLoading before navigation
                           >
                             <FaClipboardList className="text-white " />
                           </button>
