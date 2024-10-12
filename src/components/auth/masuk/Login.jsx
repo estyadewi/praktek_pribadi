@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { Input, Spinner } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
@@ -13,7 +13,7 @@ export const LoginForm = () => {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [form, setForm] = useState({ nomor: "", password: "" });
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   const toggleVisibility = useCallback(() => setIsVisible((prev) => !prev), []);
 
@@ -30,7 +30,7 @@ export const LoginForm = () => {
   const handleLogin = useCallback(
     async (e) => {
       e.preventDefault();
-      setIsNavigating(true);
+      setDisabled(true);
       try {
         const res = await login(form.nomor, form.password);
         if (res.status === "true") {
@@ -38,8 +38,7 @@ export const LoginForm = () => {
             toast.error(res.message);
             Cookies.set("activation-token", res.token);
             await regenerateOTP("all");
-            toast.success("OTP telah dikirim");
-            router.push("/aktivasi-akun");
+            router.push("/aktivasi-akun?otp=all");
           } else {
             const existingToken = Cookies.get("auth-token");
             if (existingToken) {
@@ -49,7 +48,7 @@ export const LoginForm = () => {
             toast.success(res.message);
 
             const data = await cekToken(res.token);
-            router.replace(
+            router.push(
               `/${data.role.toLowerCase().replace(" ", "-")}/dashboard`
             );
           }
@@ -63,7 +62,7 @@ export const LoginForm = () => {
       } catch (error) {
         toast.error(error.message);
       } finally {
-        setIsNavigating(false);
+        setDisabled(false);
       }
     },
     [form, router]
@@ -122,7 +121,6 @@ export const LoginForm = () => {
                     <span className="text-slate-700 text-sm">+62</span>
                   }
                   classNames={{ inputWrapper: "border" }}
-                  disabled={isNavigating}
                 />
               </div>
 
@@ -147,7 +145,6 @@ export const LoginForm = () => {
                       className="focus:outline-none"
                       type="button"
                       onClick={toggleVisibility}
-                      disabled={isNavigating}
                     >
                       {isVisible ? (
                         <MdOutlineVisibilityOff className="text-2xl text-default-400 pointer-events-none" />
@@ -157,34 +154,24 @@ export const LoginForm = () => {
                     </button>
                   }
                   type={isVisible ? "text" : "password"}
-                  disabled={isNavigating}
                 />
               </div>
 
               <div className="col-span-6 flex justify-end">
-                <Link 
-                  href="/lupa-password"
-                  className={`hover:underline text-slate-500 text-sm ${isNavigating ? 'pointer-events-none opacity-50' : ''}`}
-                  onClick={(e) => isNavigating && e.preventDefault()}
-                >
-                  Lupa Kata Sandi?
+                <Link href="/lupa-password">
+                  <p className={`hover:underline text-slate-500 text-sm ${disabled ? "pointer-events-none" : ""}`}>
+                    Lupa Kata Sandi?
+                  </p>
                 </Link>
               </div>
 
               <div className="col-span-6 sm:flex sm:items-center sm:gap-4">
                 <button
                   type="submit"
-                  className="group inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isNavigating}
+                  disabled={disabled}
+                  className="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isNavigating ? (
-                    <div className="flex items-center">
-                      <Spinner size="sm" className="mr-2 text-white group-hover:text-blue-600" />
-                      Memproses...
-                    </div>
-                  ) : (
-                    "Masuk"
-                  )}
+                  Masuk
                 </button>
               </div>
             </form>
@@ -193,8 +180,7 @@ export const LoginForm = () => {
                 Belum memiliki akun?
                 <Link
                   href="/daftar"
-                  className={`text-indigo-500 hover:underline font-bold ${isNavigating ? 'pointer-events-none opacity-50' : ''}`}
-                  onClick={(e) => isNavigating && e.preventDefault()}
+                  className={`text-indigo-500 hover:underline font-bold ${disabled ? "pointer-events-none" : ""}`}
                 >
                   {" "}
                   Daftar

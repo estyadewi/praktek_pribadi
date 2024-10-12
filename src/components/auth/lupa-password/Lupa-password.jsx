@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input, Spinner } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
@@ -10,21 +10,20 @@ import { requestOTP } from "@/services/auth";
 
 export const LupaPasswordForm = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     nomor: "",
   });
 
   const handlePhoneChange = (e) => {
     const inputValue = e.target.value;
-    const numericValue = inputValue.replace(/\D/g, "");
-
+    const numericValue = inputValue.replace(/\D/g, '');
+    
     let formattedValue = numericValue;
-    if (numericValue.length > 0 && numericValue[0] !== "8") {
-      formattedValue = "8" + numericValue.slice(1);
+    if (numericValue.length > 0 && numericValue[0] !== '8') {
+      formattedValue = '8' + numericValue.slice(1);
     }
     formattedValue = formattedValue.slice(0, 13);
-
+    
     setForm((prevForm) => ({
       ...prevForm,
       nomor: formattedValue,
@@ -37,8 +36,6 @@ export const LupaPasswordForm = () => {
       toast.error("Nomor telepon harus terdiri dari 10-13 digit");
       return;
     }
-
-    setLoading(true);
     try {
       const res = await requestOTP(form.nomor);
       if (res.status === "true") {
@@ -54,8 +51,6 @@ export const LupaPasswordForm = () => {
       }
     } catch (error) {
       toast.error(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -110,16 +105,9 @@ export const LupaPasswordForm = () => {
               <div className="col-span-6 sm:flex sm:items-center sm:gap-4">
                 <button
                   onClick={sendNomor}
-                  className="group inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
+                  className="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
                 >
-                  {loading ? (
-                    <div className="flex items-center">
-                      <Spinner size="sm" className="mr-2 text-white group-hover:text-blue-600" />{" "}
-                      Memproses...
-                    </div>
-                  ) : (
-                    "Lupa Kata Sandi"
-                  )}
+                  Lupa Kata Sandi
                 </button>
               </div>
             </div>
