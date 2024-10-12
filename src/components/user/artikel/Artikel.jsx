@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Breadcrumbs,
   BreadcrumbItem,
@@ -49,7 +49,7 @@ export const ArtikelPage = () => {
     return filteredData.slice(start, end);
   }, [page, filteredData]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getAllArtikel();
@@ -59,7 +59,7 @@ export const ArtikelPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  },[]);
 
   useEffect(() => {
     fetchData();

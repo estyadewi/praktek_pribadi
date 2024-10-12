@@ -16,7 +16,7 @@ import {
   Spinner,
 } from "@nextui-org/react";
 import { FaHome } from "react-icons/fa";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   getDokterTersedia,
   getJadwalByTanggal,
@@ -45,44 +45,39 @@ export const JadwalPraktekDokterPasien = () => {
     setTanggal(e.target.value);
   };
 
-  const fetchDokter = async () => {
+  const fetchDokter = useCallback(async () => {
     try {
       const res = await getDokterTersedia();
       setDokter(res);
-      setIdDokter(res[0].id);
+      setIdDokter(res[0]?.id || 0);
     } catch (error) {
-      return error;
+      console.error("Error fetching doctors:", error);
     }
-  };
+  }, []);
 
-  const fetchJadwalPraktek = async () => {
+  const fetchJadwalPraktek = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getJadwalByTanggal(idDokter, tanggal);
-      if (res === null) {
-        setJadwal([]);
-      } else {
-        setJadwal(res.sesi);
-      }
+      setJadwal(res?.sesi || []);
     } catch (error) {
-      return error;
+      console.error("Error fetching schedule:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [idDokter, tanggal]);
 
   useEffect(() => {
     fetchDokter();
-  }, []);
+  }, [fetchDokter]);
 
   useEffect(() => {
-    fetchJadwalPraktek();
-  }, [idDokter, tanggal]);
+    if (idDokter && tanggal) fetchJadwalPraktek();
+  }, [idDokter, tanggal, fetchJadwalPraktek]);
 
   const isPastSession = (sessionTime) => {
     const sessionDateTime = new Date(`${tanggal}T${sessionTime}:00`);
-    const currentDateTime = new Date();
-    return currentDateTime > sessionDateTime;
+    return new Date() > sessionDateTime;
   };
 
   return (
@@ -106,9 +101,7 @@ export const JadwalPraktekDokterPasien = () => {
       <div className="mt-4">
         <Card radius="sm" className="p-2">
           <CardHeader className="flex flex-col justify-center items-start">
-            <h1 className=" text-gray-600 font-semibold text-xl">
-              Jadwal Praktek
-            </h1>
+            <h1 className="text-gray-600 font-semibold text-xl">Jadwal Praktek</h1>
             <div className="mt-2 w-full flex flex-col gap-3 lg:gap-3">
               <div className="lg:max-w-64">
                 <label
@@ -124,9 +117,9 @@ export const JadwalPraktekDokterPasien = () => {
                   onChange={handleChangeIdDokter}
                   className="h-10 w-full rounded-md border-r-8 border-transparent px-3 text-sm outline-1 outline outline-slate-200 shadow-sm hover:outline-slate-400 focus:outline-slate-400 focus:shadow-outline-slate-200"
                 >
-                  {dokter.map((dokter, index) => (
-                    <option key={index} value={dokter.id}>
-                      dr.{dokter.nama} (Spesialis {dokter.spesialisasi})
+                  {dokter.map((doc) => (
+                    <option key={doc.id} value={doc.id}>
+                      dr.{doc.nama} (Spesialis {doc.spesialisasi})
                     </option>
                   ))}
                 </select>
@@ -176,15 +169,12 @@ export const JadwalPraktekDokterPasien = () => {
                   loadingContent={<Spinner size="lg" />}
                 >
                   {jadwal.map((item, index) => {
-                    const isSessionPast = isPastSession(
-                      item.waktu_selesai.slice(0, 5)
-                    ); 
+                    const isSessionPast = isPastSession(item.waktu_selesai.slice(0, 5));
                     return (
-                      <TableRow key={index}>
+                      <TableRow key={item.id}>
                         <TableCell>{index + 1}</TableCell>
                         <TableCell>
-                          {item.waktu_mulai.slice(0, 5)} -{" "}
-                          {item.waktu_selesai.slice(0, 5)}
+                          {item.waktu_mulai.slice(0, 5)} - {item.waktu_selesai.slice(0, 5)}
                         </TableCell>
                         <TableCell>
                           {!isSessionPast ? (
@@ -194,7 +184,7 @@ export const JadwalPraktekDokterPasien = () => {
                               sisa_kuota={item.sisa_kuota}
                               fetch={fetchJadwalPraktek}
                             />
-                          ):(
+                          ) : (
                             <p className="text-sm text-slate-700 font-medium">Sesi sudah berlalu</p>
                           )}
                         </TableCell>

@@ -14,7 +14,7 @@ export async function middleware(request) {
   const verify_token = cookies().get("verify-token")?.value;
   const activation_token = cookies().get("activation-token")?.value;
 
-  if (path.startsWith("/masuk")) {
+  if (path.startsWith("/masuk") && !auth_token) {
     return NextResponse.next();
   }
 
@@ -22,7 +22,10 @@ export async function middleware(request) {
     const res = await cekToken(auth_token);
 
     if (!res) {
-      return NextResponse.redirect(new URL("/masuk", request.url));
+      if (!path.startsWith("/masuk")) {
+        return NextResponse.redirect(new URL("/masuk", request.url));
+      }
+      return NextResponse.next();
     }
 
     const roleRedirects = {
@@ -35,7 +38,11 @@ export async function middleware(request) {
     if (
       ["/masuk", "/daftar", "/lupa-password", "/ganti-password", "/aktivasi-akun", "/verifikasi-otp"].some(p => path.startsWith(p))
     ) {
-      return NextResponse.redirect(new URL(roleRedirects[res.role], request.url));
+      const rolePath = roleRedirects[res.role];
+      if (!path.startsWith(rolePath)) {
+        return NextResponse.redirect(new URL(rolePath, request.url));
+      }
+      return NextResponse.next();
     }
 
     const roleAccess = {
@@ -56,20 +63,26 @@ export async function middleware(request) {
   }
 
   if (path.startsWith("/aktivasi-akun") && !activation_token) {
-    return NextResponse.redirect(new URL("/daftar", request.url));
+    if (!path.startsWith("/daftar")) {
+      return NextResponse.redirect(new URL("/daftar", request.url));
+    }
   }
 
   if (
     ["/verifikasi-otp", "/ganti-password"].some(p => path.startsWith(p)) && !verify_token
   ) {
-    return NextResponse.redirect(new URL("/lupa-password", request.url));
+    if (!path.startsWith("/lupa-password")) {
+      return NextResponse.redirect(new URL("/lupa-password", request.url));
+    }
   }
 
   if (
     ["/dokter", "/admin", "/super-user", "/pasien"].some(p => path.startsWith(p)) &&
     !auth_token
   ) {
-    return NextResponse.redirect(new URL("/masuk", request.url));
+    if (!path.startsWith("/masuk")) {
+      return NextResponse.redirect(new URL("/masuk", request.url));
+    }
   }
 
   return NextResponse.next();
@@ -78,4 +91,3 @@ export async function middleware(request) {
 export const config = {
   matcher: ["/:path*", "/super-user/:path*", "/admin/:path*", "/dokter/:path*", "/pasien/:path*"],
 };
-
