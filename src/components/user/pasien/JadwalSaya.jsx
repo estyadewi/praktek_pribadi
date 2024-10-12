@@ -7,18 +7,18 @@ import {
   CardHeader,
   CardBody,
   Spinner,
+  Button,
 } from "@nextui-org/react";
 import { FaHome, FaBookMedical, FaInfoCircle } from "react-icons/fa";
 import { formatDateWithDayName } from "@/lib/constants";
 import { getJadwalBookingPasien } from "@/services/pemeriksaan";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { ModalBatalJanjiPasien } from "@/components/modal/pemeriksaan/Modal-batal-janji-pasien";
 
 export const JadwalSayaPasien = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     try {
       const res = await getJadwalBookingPasien();
       setData(res);
@@ -27,11 +27,11 @@ export const JadwalSayaPasien = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []);
 
   return (
     <div className="p-6">

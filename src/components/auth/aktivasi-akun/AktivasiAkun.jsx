@@ -1,16 +1,15 @@
-"use client";
+"use client"
 
 import React, { useState } from "react";
-import { Input, Spinner } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams} from "next/navigation";
 import { aktivasiAkun, regenerateOTP } from "@/services/auth";
 
 export const AktivasiAkun = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     otp: "",
   });
@@ -20,9 +19,9 @@ export const AktivasiAkun = () => {
 
   const handleOTPChange = (e) => {
     const inputValue = e.target.value;
-    const numericValue = inputValue.replace(/\D/g, "");
+    const numericValue = inputValue.replace(/\D/g, '');
     const formattedValue = numericValue.slice(0, 4);
-
+    
     setForm((prevForm) => ({
       ...prevForm,
       otp: formattedValue,
@@ -31,7 +30,6 @@ export const AktivasiAkun = () => {
 
   const verfikasiOTP = async (e) => {
     e.preventDefault();
-    setLoading(true);
     if (form.otp.length !== 4) {
       toast.error("OTP harus terdiri dari 4 digit");
       return;
@@ -48,8 +46,6 @@ export const AktivasiAkun = () => {
       }
     } catch (error) {
       toast.error(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -135,16 +131,9 @@ export const AktivasiAkun = () => {
               <div className="col-span-6 sm:flex sm:items-center sm:gap-4">
                 <button
                   onClick={verfikasiOTP}
-                  className="group inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
+                  className="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
                 >
-                  {loading ? (
-                    <div className="flex items-center">
-                      <Spinner size="sm" className="mr-2 group-hover:text-blue-600 text-white"/>
-                      Memverifikasi...
-                    </div>
-                  ) : (
-                    "Verifikasi"
-                  )}
+                  Verifikasi
                 </button>
               </div>
             </div>

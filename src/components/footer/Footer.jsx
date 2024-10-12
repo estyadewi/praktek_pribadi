@@ -1,7 +1,6 @@
 "use client";
-import Link from "next/link";
-import React from "react";
-import { FaWhatsapp, FaEnvelope, FaInstagram } from "react-icons/fa";
+import React from 'react';
+import { FaWhatsapp, FaEnvelope, FaInstagram } from 'react-icons/fa';
 
 export const Footer = () => {
   return (
@@ -12,30 +11,23 @@ export const Footer = () => {
             <div>
               <h2 className="text-2xl font-bold mb-4">Tentang Kami</h2>
               <p className="text-sm">
-                Kami berkomitmen memberikan pelayanan terbaik dan personal dalam
-                kesehatan reproduksi, kehamilan, dan persalinan.
+                Kami berkomitmen memberikan pelayanan terbaik dan personal dalam kesehatan reproduksi, kehamilan, dan persalinan.
               </p>
             </div>
             <div>
               <h2 className="text-2xl font-bold mb-4">Hubungi Kami</h2>
               <ul className="space-y-2">
                 <li className="flex items-center">
-                  <Link href={"https://wa.me/6281809507311"} className="flex items-center hover:underline">
-                    <FaWhatsapp className="mr-2" />
-                    <span>0818-0950-7311</span>
-                  </Link>
+                  <FaWhatsapp className="mr-2" />
+                  <span>081231231231233</span>
                 </li>
                 <li className="flex items-center">
-                  <Link href={"mailto:dr.estyadewiwidyasari@gmail.com"} className="flex items-center hover:underline">
-                    <FaEnvelope className="mr-2" />
-                    <span>dr.estyadewiwidyasari@gmail.com</span>
-                  </Link>
+                  <FaEnvelope className="mr-2" />
+                  <span>praktekpribadi@gmail.com</span>
                 </li>
                 <li className="flex items-center">
-                  <Link href={"https://www.instagram.com/praktek_dr.estya/"} className="flex items-center hover:underline">
-                    <FaInstagram className="mr-2" />
-                    <span>praktek_dr.estya</span>
-                  </Link>
+                  <FaInstagram className="mr-2" />
+                  <span>081231231231233</span>
                 </li>
               </ul>
             </div>
@@ -43,8 +35,7 @@ export const Footer = () => {
           <div>
             <h2 className="text-2xl font-bold mb-4">Lokasi</h2>
             <p className="text-sm mb-4">
-              Jl. HOS Cokroaminoto No.32, Pakuncen, Wirobrajan, Kota Yogyakarta,
-              Daerah Istimewa Yogyakarta 55253, Indonesia
+              Jl. HOS Cokroaminoto No.32, Pakuncen, Wirobrajan, Kota Yogyakarta, Daerah Istimewa Yogyakarta 55253, Indonesia
             </p>
             <div className="aspect-w-16 aspect-h-9">
               <iframe

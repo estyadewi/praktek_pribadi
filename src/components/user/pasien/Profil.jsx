@@ -11,7 +11,7 @@ import {
   Spinner,
 } from "@nextui-org/react";
 import { FaHome } from "react-icons/fa";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 import { getProfilePasien, updateProfilPasien } from "@/services/data-pasien";
 import { changePassword } from "@/services/auth";
@@ -102,7 +102,7 @@ export const ProfilPasien = () => {
   const toggleVisibility1 = () => setIsVisible1(!isVisible1);
   const toggleVisibility2 = () => setIsVisible2(!isVisible2);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     try {
       const data = await getProfilePasien();
       setData(data);
@@ -112,11 +112,11 @@ export const ProfilPasien = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []);
 
   return (
     <div className="p-6">
