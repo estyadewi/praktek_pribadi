@@ -70,7 +70,6 @@ export const JadwalPraktekPage = () => {
         getJadwalDadakanByDokter(dokterSelected),
       ]);
       setData(jadwalHarian);
-      console.log(jadwalD);
       setJadwalDadakan(jadwalD);
     } catch (error) {
       console.error(error);

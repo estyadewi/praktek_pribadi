@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardBody, Breadcrumbs, BreadcrumbItem, Input, Button, Checkbox } from '@nextui-org/react';
+import { Card, CardBody, Breadcrumbs, BreadcrumbItem, Input, Button, Checkbox, Spinner } from '@nextui-org/react';
 import { FaHome } from 'react-icons/fa';
 import { updateJadwalDadakan, getJadwalByTanggal } from '@/services/jadwal-praktek';
 import toast from 'react-hot-toast';
@@ -14,6 +14,7 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
     const dokterId = searchParams.get('idDokter');
     const [loading, setLoading] = useState(false);
     const [isDisabled, setIsDisabled] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(true);
     const [id, setId] = useState(null);
     const [sesi, setSesi] = useState([
         {
@@ -61,7 +62,6 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
                 waktu_selesai: item.waktu_selesai.slice(0, 5),
             }));
             const data = { tanggal: tanggalData, sesi: updatedSesi };
-            console.log(data);
             const res = await updateJadwalDadakan(data, id);
             if (res.status === 'success') {
                 toast.success(res.message);
@@ -81,21 +81,22 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
     };
 
     const fetchJadwal = useCallback(async () => {
+        setLoadingPage(true);
         try {
             const res = await getJadwalByTanggal(dokterId, tanggal);
-            console.log(res);
-            if (res === null){
+            if (res.sesi.length === 0) {
                 setId(res.id);
                 setIsDisabled(true);
                 handleCheckboxChange({ target: { checked: true } });
             } else {
-                console.log(res)
                 setId(res.id);
                 setSesi(res.sesi);
                 setOriginalSesi(res.sesi);
             }
         } catch (error) {
             toast.error(error.message);
+        } finally {
+            setLoadingPage(false);
         }
     }, [dokterId, tanggal]);
 
@@ -118,139 +119,145 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
             <Card radius='sm' className='mt-4'>
                 <CardBody>
                     <h1 className="text-xl font-semibold text-slate-700">Form Ubah Jadwal Praktek</h1>
-                    <div className='mt-3 grid grid-rows-2 gap-3'>
-                        <div className='grid grid-cols-2 lg:grid-cols-3 items-center gap-4'>
-                            <div>
-                                <label htmlFor="tanggal" className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
-                                    Tanggal <span className="text-red-700">*</span>
-                                </label>
-                                <Input
-                                    value={tanggalData}
-                                    type="date"
-                                    id='tanggal'
-                                    variant="bordered"
-                                    name="tanggal"
-                                    size="md"
-                                    radius="sm"
-                                    className="bg-white"
-                                    onChange={handleTanggalChange}
-                                    min={
-                                        new Intl.DateTimeFormat('en-CA', { 
-                                            timeZone: 'Asia/Jakarta', 
-                                            year: 'numeric', 
-                                            month: '2-digit', 
-                                            day: '2-digit' 
-                                          }).format(new Date())
-                                    }
-                                    classNames={{
-                                        inputWrapper: "border",
-                                    }}
-                                />
-                            </div>
-                            <Checkbox className='mt-2' onChange={handleCheckboxChange} isSelected={isDisabled}>
-                                <span className='text-xs sm:text-sm font-medium text-slate-700 whitespace-nowrap'>Tidak Ada Praktek</span>
-                            </Checkbox>
+                    {loadingPage ? (
+                        <div className='flex justify-center items-center h-40'>
+                            <Spinner color='primary'/>
                         </div>
-                        <div className='grid grid-cols-3 items-end gap-4'>
-                            <div>
-                                <label htmlFor="jumlah_slot" className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
-                                    Jumlah Slot <span className="text-red-700">*</span>
-                                </label>
-                                <Input
-                                    disabled
-                                    id='jumlah_slot'
-                                    type="number"
-                                    value={isDisabled ? 0 : sesi.length}
-                                    variant="bordered"
-                                    name="jumlah_slot"
-                                    size="md"
-                                    radius="sm"
-                                    className="bg-white"
-                                    classNames={{
-                                    inputWrapper: "border",
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <Button className='bg-orange-500 text-white w-full disabled:opacity-80' onClick={handleAddSesi} disabled={isDisabled}>
-                                    Tambah Slot
-                                </Button>
-                            </div>
-                            <div>
-                                <Button color='success' className='text-white w-full' onClick={handleSubmit} isLoading={loading} spinnerPlacement='end'>
-                                    Simpan
-                                </Button>
-                            </div>
-                        </div>
-
-                        {sesi.map((item, index) => (
-                            <div key={index} className='grid grid-cols-2 sm:grid-cols-2 gap-4'>
+                    ) : (
+                        <div className='mt-3 grid grid-rows-2 gap-3'>
+                            <div className='grid grid-cols-2 lg:grid-cols-3 items-center gap-4'>
                                 <div>
-                                    <label htmlFor={`waktu_mulai_${index}`} className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
-                                        Waktu Mulai <span className="text-red-700">*</span>
+                                    <label htmlFor="tanggal" className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
+                                        Tanggal <span className="text-red-700">*</span>
                                     </label>
                                     <Input
-                                        id={`waktu_mulai_${index}`}
-                                        type="time"
+                                        value={tanggalData}
+                                        type="date"
+                                        id='tanggal'
                                         variant="bordered"
-                                        name="waktu_mulai"
+                                        name="tanggal"
                                         size="md"
                                         radius="sm"
                                         className="bg-white"
-                                        value={item.waktu_mulai}
-                                        onChange={(e) => handleSesiChange(e, index)}
+                                        onChange={handleTanggalChange}
+                                        min={
+                                            new Intl.DateTimeFormat('en-CA', { 
+                                                timeZone: 'Asia/Jakarta', 
+                                                year: 'numeric', 
+                                                month: '2-digit', 
+                                                day: '2-digit' 
+                                            }).format(new Date())
+                                        }
                                         classNames={{
                                             inputWrapper: "border",
                                         }}
                                     />
                                 </div>
+                                <Checkbox className='mt-2' onChange={handleCheckboxChange} isSelected={isDisabled}>
+                                    <span className='text-xs sm:text-sm font-medium text-slate-700 whitespace-nowrap'>Tidak Ada Praktek</span>
+                                </Checkbox>
+                            </div>
+                            <div className='grid grid-cols-3 items-end gap-4'>
                                 <div>
-                                    <label htmlFor={`waktu_selesai_${index}`} className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
-                                        Waktu Selesai <span className="text-red-700">*</span>
+                                    <label htmlFor="jumlah_slot" className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
+                                        Jumlah Slot <span className="text-red-700">*</span>
                                     </label>
                                     <Input
-                                        id={`waktu_selesai_${index}`}
-                                        type="time"
-                                        variant="bordered"
-                                        name="waktu_selesai"
-                                        size="md"
-                                        radius="sm"
-                                        className="bg-white"
-                                        value={item.waktu_selesai}
-                                        onChange={(e) => handleSesiChange(e, index)}
-                                        classNames={{
-                                            inputWrapper: "border",
-                                        }}
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor={`kuota_${index}`} className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
-                                        Kuota <span className="text-red-700">*</span>
-                                    </label>
-                                    <Input
-                                        id={`kuota_${index}`}
+                                        disabled
+                                        id='jumlah_slot'
                                         type="number"
+                                        value={isDisabled ? 0 : sesi.length}
                                         variant="bordered"
-                                        name="kuota"
+                                        name="jumlah_slot"
                                         size="md"
                                         radius="sm"
                                         className="bg-white"
-                                        value={item.kuota}
-                                        onChange={(e) => handleSesiChange(e, index)}
                                         classNames={{
-                                            inputWrapper: "border",
+                                        inputWrapper: "border",
                                         }}
                                     />
                                 </div>
-                                <div className='grid grid-cols-3 mt-6 sm:mt-7'>
-                                    <Button className='text-white bg-[#EF4444] w-full disabled:opacity-80' onClick={() => handleRemoveSesi(index)} disabled={sesi.length === 1}>
-                                        Hapus
+
+                                <div>
+                                    <Button className='bg-orange-500 text-white w-full disabled:opacity-80' onClick={handleAddSesi} disabled={isDisabled}>
+                                        Tambah Slot
+                                    </Button>
+                                </div>
+                                <div>
+                                    <Button color='success' className='text-white w-full' onClick={handleSubmit} isLoading={loading} spinnerPlacement='end'>
+                                        Simpan
                                     </Button>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+
+                            {sesi.map((item, index) => (
+                                <div key={index} className='grid grid-cols-2 sm:grid-cols-2 gap-4'>
+                                    <div>
+                                        <label htmlFor={`waktu_mulai_${index}`} className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
+                                            Waktu Mulai <span className="text-red-700">*</span>
+                                        </label>
+                                        <Input
+                                            id={`waktu_mulai_${index}`}
+                                            type="time"
+                                            variant="bordered"
+                                            name="waktu_mulai"
+                                            size="md"
+                                            radius="sm"
+                                            className="bg-white"
+                                            value={item.waktu_mulai}
+                                            onChange={(e) => handleSesiChange(e, index)}
+                                            classNames={{
+                                                inputWrapper: "border",
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor={`waktu_selesai_${index}`} className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
+                                            Waktu Selesai <span className="text-red-700">*</span>
+                                        </label>
+                                        <Input
+                                            id={`waktu_selesai_${index}`}
+                                            type="time"
+                                            variant="bordered"
+                                            name="waktu_selesai"
+                                            size="md"
+                                            radius="sm"
+                                            className="bg-white"
+                                            value={item.waktu_selesai}
+                                            onChange={(e) => handleSesiChange(e, index)}
+                                            classNames={{
+                                                inputWrapper: "border",
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor={`kuota_${index}`} className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
+                                            Kuota <span className="text-red-700">*</span>
+                                        </label>
+                                        <Input
+                                            id={`kuota_${index}`}
+                                            type="number"
+                                            variant="bordered"
+                                            name="kuota"
+                                            size="md"
+                                            radius="sm"
+                                            className="bg-white"
+                                            value={item.kuota}
+                                            onChange={(e) => handleSesiChange(e, index)}
+                                            classNames={{
+                                                inputWrapper: "border",
+                                            }}
+                                        />
+                                    </div>
+                                    <div className='grid grid-cols-3 mt-6 sm:mt-7'>
+                                        <Button className='text-white bg-[#EF4444] w-full disabled:opacity-80' onClick={() => handleRemoveSesi(index)} disabled={sesi.length === 1}>
+                                            Hapus
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </CardBody>
             </Card>
         </div>

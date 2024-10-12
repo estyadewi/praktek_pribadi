@@ -20,6 +20,7 @@ import {
 import { FaHome, FaSearch } from "react-icons/fa";
 import { getAllObat } from "@/services/obat";
 import { ModalTambahStokObat } from "@/components/modal/obat/Modal-tambah-stok-obat";
+import { formatRupiah } from "@/lib/constants";
 
 export const ObatPage = () => {
   const [data, setData] = useState([]);
@@ -166,7 +167,7 @@ export const ObatPage = () => {
                     </TableCell>
                     <TableCell>{getKeyValue(item, "jenis")}</TableCell>
                     <TableCell>{getKeyValue(item, "stok")}</TableCell>
-                    <TableCell>{getKeyValue(item, "harga")}</TableCell>
+                    <TableCell>{formatRupiah(getKeyValue(item, "harga"))}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
