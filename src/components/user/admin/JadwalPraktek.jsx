@@ -115,8 +115,7 @@ export const JadwalPraktekPage = () => {
       <Breadcrumbs
         size="lg"
         itemClasses={{
-          item:
-            "text-slate-700 font-semibold data-[current=true]:text-slate-400 data-[current=true]:font-normal",
+          item: "text-slate-700 font-semibold data-[current=true]:text-slate-400 data-[current=true]:font-normal",
           separator: "text-slate-700 text-xl",
         }}
       >
@@ -126,9 +125,7 @@ export const JadwalPraktekPage = () => {
         >
           Dashboard
         </BreadcrumbItem>
-        <BreadcrumbItem className="font-normal">
-          Jadwal Praktek
-        </BreadcrumbItem>
+        <BreadcrumbItem className="font-normal">Jadwal Praktek</BreadcrumbItem>
       </Breadcrumbs>
 
       <div>
@@ -179,10 +176,7 @@ export const JadwalPraktekPage = () => {
                 <TableColumn>Kuota</TableColumn>
                 <TableColumn>Aksi</TableColumn>
               </TableHeader>
-              <TableBody
-                items={data}
-                emptyContent={"Tidak Ada Jadwal Praktek"}
-              >
+              <TableBody items={data} emptyContent={"Tidak Ada Jadwal Praktek"}>
                 {data.map(({ id, hari, sesi }, index) => (
                   <TableRow key={id}>
                     <TableCell>{index + 1}</TableCell>
@@ -233,6 +227,7 @@ export const JadwalPraktekPage = () => {
                     radius="sm"
                     value={searchTerm}
                     onChange={handleSearch}
+                    placeholder="Cari berdasarkan tanggal atau hari"
                   />
                 </div>
               </div>
@@ -244,7 +239,19 @@ export const JadwalPraktekPage = () => {
                     radius="sm"
                     value={searchTerm}
                     onChange={handleSearch}
+                    placeholder="Cari berdasarkan tanggal atau hari"
                   />
+                </div>
+                <div className="w-full">
+                  <Button
+                    href={`/admin/jadwal-praktek/perubahan-jadwal?idDokter=${dokterSelected}`}
+                    as={Link}
+                    color="success"
+                    className="text-white w-full"
+                    radius="sm"
+                  >
+                    Perubahan Jadwal
+                  </Button>
                 </div>
               </div>
             </CardBody>
@@ -278,12 +285,19 @@ export const JadwalPraktekPage = () => {
               >
                 {itemsDadakan.map(({ id, tanggal, hari, sesi }, index) => (
                   <TableRow key={id}>
-                    <TableCell>{(pageDadakan - 1) * rowsPerPage + index + 1}</TableCell>
+                    <TableCell>
+                      {(pageDadakan - 1) * rowsPerPage + index + 1}
+                    </TableCell>
                     <TableCell>{formatDate(tanggal)}</TableCell>
                     <TableCell>{hari}</TableCell>
                     <TableCell>{sesi.length}</TableCell>
-                    <TableCell>{calculateTotalKuota({tanggal, sesi}) || sesi.length}</TableCell>
-                    <TableCell className="flex flex-row space-x-2 md:space-y-0"l>
+                    <TableCell>
+                      {calculateTotalKuota({ tanggal, sesi }) || sesi.length}
+                    </TableCell>
+                    <TableCell
+                      className="flex flex-row space-x-2 md:space-y-0"
+                      l
+                    >
                       <ModalHapusJadwalDadakan
                         id={id}
                         tanggal={tanggal}

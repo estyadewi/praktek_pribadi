@@ -25,11 +25,9 @@ export const DataPasienPage = () => {
 
     const filteredData = useMemo(() => {
         return data.filter(item => {
-            const itemId = String(item.id);
-            const itemNomor = String(item.user.nomor);
+            const itemNORM = String(item.nomor_rm);
             return item.user.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            itemNomor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            itemId.toLowerCase().includes(searchTerm.toLowerCase())
+            itemNORM.toLowerCase().includes(searchTerm.toLowerCase())
         });
     }, [searchTerm, data]);
 
@@ -84,6 +82,7 @@ export const DataPasienPage = () => {
                                     radius="sm"
                                     value={searchTerm}
                                     onChange={handleSearch}
+                                    placeholder="Cari berdasarkan nama atau nomor RM"
                                 />
                             </div>
                         </div>
@@ -95,6 +94,7 @@ export const DataPasienPage = () => {
                                     radius="sm"
                                     value={searchTerm}
                                     onChange={handleSearch}
+                                    placeholder="Cari berdasarkan nama atau nomor RM"
                                 />
                             </div>
                             <div className="w-full space-y-2">

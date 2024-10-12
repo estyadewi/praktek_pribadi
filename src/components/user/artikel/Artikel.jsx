@@ -111,6 +111,7 @@ export const ArtikelPage = () => {
                   radius="sm"
                   value={searchTerm}
                   onChange={handleSearch}
+                  placeholder="Cari berdasarkan judul"
                 />
               </div>
             </div>
@@ -122,6 +123,7 @@ export const ArtikelPage = () => {
                   radius="sm"
                   value={searchTerm}
                   onChange={handleSearch}
+                  placeholder="Cari berdasarkan judul"
                 />
               </div>
               <div className="w-full">

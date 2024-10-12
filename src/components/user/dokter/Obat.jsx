@@ -108,6 +108,7 @@ export const ObatPage = () => {
                   radius="sm"
                   value={searchTerm}
                   onChange={handleSearch}
+                  placeholder="Cari berdasarkan nama obat"
                 />
               </div>
             </div>
@@ -119,6 +120,7 @@ export const ObatPage = () => {
                   radius="sm"
                   value={searchTerm}
                   onChange={handleSearch}
+                  placeholder="Cari berdasarkan nama obat"
                 />
               </div>
               <div className="w-full space-y-2">

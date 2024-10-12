@@ -107,6 +107,7 @@ export const LayananPage = () => {
                   radius="sm"
                   value={searchTerm}
                   onChange={handleSearch}
+                  placeholder="Cari berdasarkan nama layanan"
                 />
               </div>
             </div>
@@ -118,6 +119,7 @@ export const LayananPage = () => {
                   radius="sm"
                   value={searchTerm}
                   onChange={handleSearch}
+                  placeholder="Cari berdasarkan nama layanan"
                 />
               </div>
               <div className="w-full">

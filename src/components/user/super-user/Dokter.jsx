@@ -22,11 +22,8 @@ export const DokterPage = () => {
 
     const filteredData = useMemo(() => {
         return data.filter(item => {
-            const itemLoginNumber = String(item.nomor);
-            return item.nama.toLowerCase().includes(searchTerm.toLowerCase())||
-            itemLoginNumber.toLowerCase().includes(searchTerm.toLowerCase())
-        }
-        );
+            return item.nama.toLowerCase().includes(searchTerm.toLowerCase())
+        });
     }, [searchTerm, data]);
 
     const pages = Math.ceil(filteredData.length / rowsPerPage);
@@ -80,6 +77,7 @@ export const DokterPage = () => {
                                     radius="sm"
                                     value={searchTerm}
                                     onChange={handleSearch}
+                                    placeholder="Cari Dokter"
                                 />
                             </div>
                         </div>
@@ -91,6 +89,7 @@ export const DokterPage = () => {
                                     radius="sm"
                                     value={searchTerm}
                                     onChange={handleSearch}
+                                    placeholder="Cari Dokter"
                                 />
                             </div>
                             <div className="w-full">
