@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { Card, CardBody } from "@nextui-org/react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 
@@ -8,10 +8,14 @@ const Counter = ({ value }) => {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
 
-  useEffect(() => {
+  const animateCount = useCallback(() => {
     const controls = animate(count, value, { duration: 2 });
     return controls.stop;
-  }, [value]);
+  }, [count, value]);
+
+  useEffect(() => {
+    return animateCount();
+  }, [animateCount]);
 
   return <motion.span>{rounded}</motion.span>;
 };

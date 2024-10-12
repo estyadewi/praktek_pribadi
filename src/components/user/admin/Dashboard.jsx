@@ -57,7 +57,7 @@ export const DashboardAdmin = () => {
     }
   };
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const [pasienRes, dashboardRes] = await Promise.all([
@@ -75,7 +75,7 @@ export const DashboardAdmin = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedDokter]);
 
   const handleChangeDokter = useCallback((e) => {
     setSelectedDokter(e.target.value);
@@ -87,7 +87,7 @@ export const DashboardAdmin = () => {
 
   useEffect(() => {
     if (selectedDokter) fetchDashboardData();
-  }, [selectedDokter]);
+  }, [selectedDokter, fetchDashboardData]);
 
   return (
     <div className="p-6">

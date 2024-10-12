@@ -70,6 +70,7 @@ export const JadwalPraktekPage = () => {
         getJadwalDadakanByDokter(dokterSelected),
       ]);
       setData(jadwalHarian);
+      console.log(jadwalD);
       setJadwalDadakan(jadwalD);
     } catch (error) {
       console.error(error);
@@ -268,23 +269,40 @@ export const JadwalPraktekPage = () => {
                 <TableColumn>No</TableColumn>
                 <TableColumn>Tanggal</TableColumn>
                 <TableColumn>Hari</TableColumn>
+                <TableColumn>Slot</TableColumn>
+                <TableColumn>Kuota</TableColumn>
                 <TableColumn>Aksi</TableColumn>
               </TableHeader>
               <TableBody
                 items={itemsDadakan}
                 emptyContent={"Tidak Ada Jadwal Praktek Dadakan"}
               >
-                {itemsDadakan.map(({ id, tanggal, hari }, index) => (
+                {itemsDadakan.map(({ id, tanggal, hari, sesi }, index) => (
                   <TableRow key={id}>
                     <TableCell>{(pageDadakan - 1) * rowsPerPage + index + 1}</TableCell>
                     <TableCell>{formatDate(tanggal)}</TableCell>
                     <TableCell>{hari}</TableCell>
-                    <TableCell>
+                    <TableCell>{sesi.length}</TableCell>
+                    <TableCell>{calculateTotalKuota({tanggal, sesi}) || sesi.length}</TableCell>
+                    <TableCell className="flex flex-row space-x-2 md:space-y-0"l>
                       <ModalHapusJadwalDadakan
                         id={id}
                         tanggal={tanggal}
                         refresh={fetchData}
                       />
+                      <Tooltip
+                        placement="top"
+                        showArrow
+                        content="Ubah Jadwal Praktek"
+                      >
+                        <Link
+                          href={`/admin/jadwal-praktek/${tanggal}/ubah-perubahan-jadwal?idDokter=${dokterSelected}`}
+                        >
+                          <button className="p-2 bg-orange-500 rounded hover:opacity-80">
+                            <FaCalendarAlt className="text-white" />
+                          </button>
+                        </Link>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}

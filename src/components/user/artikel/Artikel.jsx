@@ -63,7 +63,7 @@ export const ArtikelPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   useEffect(() => {
     if (page > pages && pages > 0) {

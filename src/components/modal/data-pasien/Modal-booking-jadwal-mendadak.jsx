@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   ModalContent,
@@ -16,7 +16,7 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { getJadwalByTanggal } from "@/services/jadwal-praktek";
 import { insertBookingDadakanPasien } from "@/services/data-pasien";
 
-export const ModalBookingJadwalMendadakPasien = memo(({ fetch, idPasien, dokter }) => {
+export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [loading, setLoading] = useState(false);
   const [loadingSesi, setLoadingSesi] = useState(false);
@@ -66,7 +66,7 @@ export const ModalBookingJadwalMendadakPasien = memo(({ fetch, idPasien, dokter 
     }
   };
 
-  const fetchSesi = async () => {
+  const fetchSesi = useCallback(async () => {
     if (state.dokter_id && state.tanggal_pemeriksaan) {
       setLoadingSesi(true);
       try {
@@ -78,11 +78,11 @@ export const ModalBookingJadwalMendadakPasien = memo(({ fetch, idPasien, dokter 
         setLoadingSesi(false);
       }
     }
-  };
+  }, [state.dokter_id, state.tanggal_pemeriksaan]);
 
   useEffect(() => {
     fetchSesi();
-  }, [state.dokter_id, state.tanggal_pemeriksaan]);
+  }, [fetchSesi]);
 
   const handleModalClose = (openStatus) => {
     if (!openStatus) {
@@ -201,4 +201,4 @@ export const ModalBookingJadwalMendadakPasien = memo(({ fetch, idPasien, dokter 
       </Modal>
     </>
   );
-});
+};
