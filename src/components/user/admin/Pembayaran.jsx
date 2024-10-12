@@ -98,6 +98,7 @@ export const PembayaranPage = () => {
             radius="sm"
             value={searchTerm}
             onChange={handleSearch}
+            placeholder="Cari berdasarkan nama pasien"
           />
         </div>
       </div>
@@ -112,6 +113,7 @@ export const PembayaranPage = () => {
                   radius="sm"
                   value={searchTerm}
                   onChange={handleSearch}
+                  placeholder="Cari berdasarkan nama pasien"
                 />
               </div>
             </div>

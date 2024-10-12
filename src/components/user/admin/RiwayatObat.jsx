@@ -99,6 +99,7 @@ export const RiwayatObatPage = () => {
                         radius="sm"
                         value={searchTerm}
                         onChange={handleSearch}
+                        placeholder="Cari berdasarkan nama atau tanggal"
                     />
                 </div>
             </div>

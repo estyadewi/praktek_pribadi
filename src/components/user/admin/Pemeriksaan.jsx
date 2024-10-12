@@ -104,6 +104,7 @@ export const PemeriksaanAdminPage = () => {
                         radius="sm"
                         value={searchTerm}
                         onChange={handleSearch}
+                        placeholder="Cari berdasarkan nama pasien"
                     />
                 </div>
             </div>
@@ -118,6 +119,7 @@ export const PemeriksaanAdminPage = () => {
                                     radius="sm"
                                     value={searchTerm}
                                     onChange={handleSearch}
+                                    placeholder="Cari berdasarkan nama pasien"
                                 />
                             </div>
                             <div className="flex justify-center bg-[#F4F4F5] mt-2 rounded-md p-1">
