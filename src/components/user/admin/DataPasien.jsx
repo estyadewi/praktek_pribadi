@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Breadcrumbs, BreadcrumbItem, Card, CardBody, Input, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, getKeyValue, Spinner } from "@nextui-org/react";
 import { FaHome, FaSearch } from "react-icons/fa";
 import { getDataPasien } from "@/services/data-pasien";
@@ -8,9 +8,11 @@ import { ModalTambahPasien } from "@/components/modal/data-pasien/Modal-tambah-p
 import { ModalDetailPasien } from "@/components/modal/data-pasien/Modal-detail-pasien";
 import { ModalUbahPasien } from "@/components/modal/data-pasien/Modal-ubah-pasien";
 import { ModalBookingJadwalMendadakPasien } from "@/components/modal/data-pasien/Modal-booking-jadwal-mendadak";
+import { getDokterTersedia } from "@/services/jadwal-praktek";
 
 export const DataPasienPage = () => {
     const [data, setData] = useState([]);
+    const [dokter, setDokter] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -39,21 +41,21 @@ export const DataPasienPage = () => {
         return filteredData.slice(start, end);
     }, [page, filteredData]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getDataPasien();
-            setData(res);
+            const [dataPasien, dataDokter] = await Promise.all([getDataPasien(), getDokterTersedia()]);
+            setData(dataPasien);
+            setDokter(dataDokter);
         } catch (error) {
             console.error("Failed to fetch data", error);
         } finally {
             setLoading(false);
         }
-    };
-
+    }, []);
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     useEffect(() => {
         if (page > pages && pages > 0) {
@@ -144,7 +146,7 @@ export const DataPasienPage = () => {
                                         <TableCell className="flex flex-row space-x-2 md:space-y-0">
                                             <ModalDetailPasien data={item}/>
                                             <ModalUbahPasien pasien={item} fetch={fetchData}/>
-                                            <ModalBookingJadwalMendadakPasien fetch={fetchData} idPasien={item.id}/>
+                                            <ModalBookingJadwalMendadakPasien fetch={fetchData} idPasien={item.id} dokter={dokter}/>
                                         </TableCell>
 
                                     </TableRow>
