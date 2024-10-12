@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   ModalContent,
@@ -14,111 +13,88 @@ import {
 } from "@nextui-org/react";
 import toast from "react-hot-toast";
 import { FaCalendarAlt } from "react-icons/fa";
-import {
-  getDokterTersedia,
-  getJadwalByTanggal,
-} from "@/services/jadwal-praktek";
+import { getJadwalByTanggal } from "@/services/jadwal-praktek";
 import { insertBookingDadakanPasien } from "@/services/data-pasien";
 
-export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien }) => {
+export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState({});
-  const [dokter, setDokter] = useState([]);
-  const [selectedDokter, setSelectedDokter] = useState(1);
-  const [sesi, setSesi] = useState([]);
   const [loadingSesi, setLoadingSesi] = useState(false);
+  const [state, setState] = useState({
+    tanggal_pemeriksaan: '',
+    dokter_id: dokter[0]?.id || '',
+    sesi_id: '',
+  });
+  const [sesi, setSesi] = useState([]);
 
   const handleChange = (e) => {
     const { value, name } = e.target;
-    setData({
-      ...data,
-      [name]: value,
-    });
+    setState((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleBookingDadakanPasien = async (e) => {
     e.preventDefault();
+    const { tanggal_pemeriksaan, dokter_id } = state;
     const dataBooking = {
-      ...data,
+      tanggal_pemeriksaan,
       pasien_id: idPasien,
+      dokter_id,
+      sesi_id: state.sesi_id,
     };
+
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await insertBookingDadakanPasien(dataBooking);
       if (res.status === "true") {
         toast.success(res.message);
-        setLoading(false);
         fetch();
         onOpenChange();
-        setData({});
+        setState({ tanggal_pemeriksaan: '', dokter_id: dokter[0]?.id || '', sesi_id: '' });
       } else {
-        setLoading(false);
-        if (res.error instanceof Object) {
-          for (const key in res.error) {
-            toast.error(res.error[key]);
-          }
-        } else throw new Error(res.error);
+        throw new Error(res.error);
       }
     } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  const fetchDokter = async () => {
-    try {
-      const res = await getDokterTersedia();
-      setDokter(res);
-      setSelectedDokter(res[0].id);
-      setData({
-        ...data,
-        dokter_id: res[0].id,
-      });
-    } catch (error) {
-      return error;
-    }
-  };
-
-  const fetchSesi = async () => {
-    setLoadingSesi(true);
-    try {
-      const res = await getJadwalByTanggal(
-        selectedDokter,
-        data.tanggal_pemeriksaan
-      );
-      setSesi(res.sesi);
-    } catch (error) {
-      return error;
+      if (error instanceof Object) {
+        for (const key in error) {
+          toast.error(error[key]);
+        }
+      } else {
+        toast.error(error.message);
+      }
     } finally {
-      setLoadingSesi(false);
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchDokter();
-  }, []);
-
-  useEffect(() => {
-    if (selectedDokter && data.tanggal_pemeriksaan) {
-        fetchSesi();
+  const fetchSesi = useCallback(async () => {
+    if (state.dokter_id && state.tanggal_pemeriksaan) {
+      setLoadingSesi(true);
+      try {
+        const res = await getJadwalByTanggal(state.dokter_id, state.tanggal_pemeriksaan);
+        setSesi(res.sesi);
+      } catch (error) {
+        toast.error("Error fetching sesi: " + error.message);
+      } finally {
+        setLoadingSesi(false);
+      }
     }
-}, [selectedDokter, data.tanggal_pemeriksaan]);
+  }, [state.dokter_id, state.tanggal_pemeriksaan]);
 
+  useEffect(() => {
+    fetchSesi();
+  }, [fetchSesi]);
 
   const handleModalClose = (openStatus) => {
-    if (openStatus === false) {
+    if (!openStatus) {
       onOpenChange();
-      setData({});
+      setState({ tanggal_pemeriksaan: '', dokter_id: dokter[0]?.id || '', sesi_id: '' });
     }
   };
 
   return (
     <>
       <Tooltip showArrow content="Booking Jadwal Mendadak" placement="top">
-        <button
-          onClick={onOpen}
-          className="bg-red-600 p-2 rounded hover:opacity-80"
-        >
+        <button onClick={onOpen} className="bg-red-600 p-2 rounded hover:opacity-80">
           <FaCalendarAlt className="text-white" />
         </button>
       </Tooltip>
@@ -133,38 +109,30 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien }) => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                Daftar Booking Pasien
-              </ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Daftar Booking Pasien</ModalHeader>
               <ModalBody>
                 <div className="flex flex-col gap-5">
                   <div>
-                    <label
-                      htmlFor="dokter"
-                      className="block text-sm font-medium text-slate-700 mb-2"
-                    >
+                    <label htmlFor="dokter" className="block text-sm font-medium text-slate-700 mb-2">
                       Pilih Dokter <span className="text-red-700">*</span>
                     </label>
                     <select
                       onChange={handleChange}
-                      value={selectedDokter}
+                      value={state.dokter_id}
                       name="dokter_id"
                       id="dokter"
                       className="h-10 w-full rounded-md border-r-8 border-transparent px-3 text-sm outline-1 outline outline-slate-200 shadow-sm hover:outline-slate-400 focus:outline-slate-400 focus:shadow-outline-slate-200"
                     >
-                      {dokter.map((dokter) => (
-                        <option key={dokter.id} value={dokter.id}>
-                          dr. {dokter.nama}
+                      {dokter.map((dok) => (
+                        <option key={dok.id} value={dok.id}>
+                          dr. {dok.nama}
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="tanggal"
-                      className="block text-sm font-medium text-slate-700 mb-2"
-                    >
+                    <label htmlFor="tanggal" className="block text-sm font-medium text-slate-700 mb-2">
                       Tanggal Booking <span className="text-red-700">*</span>
                     </label>
                     <Input
@@ -180,7 +148,8 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien }) => {
                       }}
                     />
                   </div>
-                  {data.tanggal_pemeriksaan && (
+
+                  {state.tanggal_pemeriksaan && (
                     <div>
                       {loadingSesi ? (
                         <div className="flex justify-center items-center">
@@ -188,10 +157,7 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien }) => {
                         </div>
                       ) : (
                         <div>
-                          <label
-                            htmlFor="sesi"
-                            className="block text-sm font-medium text-slate-700 mb-2"
-                          >
+                          <label htmlFor="sesi" className="block text-sm font-medium text-slate-700 mb-2">
                             Pilih Sesi <span className="text-red-700">*</span>
                           </label>
                           <select
@@ -200,25 +166,19 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien }) => {
                             id="sesi"
                             className="h-10 w-full rounded-md border-r-8 border-transparent px-3 text-sm outline-1 outline outline-slate-200 shadow-sm hover:outline-slate-400 focus:outline-slate-400 focus:shadow-outline-slate-200"
                           >
-                            {sesi.filter((item) => item.sisa_kuota !== 0)
-                              .length > 0 && (
-                              <option value="" selected disabled hidden>
-                                Pilih Sesi
-                              </option>
-                            )}
-                            {sesi
-                              .filter((item) => item.sisa_kuota !== 0)
-                              .map((item) => (
-                                <option key={item.id} value={item.id}>
-                                  {item.waktu_mulai.slice(0, 5)} -{" "}
-                                  {item.waktu_selesai.slice(0, 5)}
+                            {sesi.filter((item) => item.sisa_kuota !== 0).length > 0 ? (
+                              <>
+                                <option value="" disabled hidden>
+                                  Pilih Sesi
                                 </option>
-                              ))}
-                            {sesi.filter((item) => item.sisa_kuota !== 0)
-                              .length === 0 && (
-                              <option selected disabled>
-                                Tidak ada sesi tersedia
-                              </option>
+                                {sesi.filter((item) => item.sisa_kuota !== 0).map((item) => (
+                                  <option key={item.id} value={item.id}>
+                                    {item.waktu_mulai.slice(0, 5)} - {item.waktu_selesai.slice(0, 5)}
+                                  </option>
+                                ))}
+                              </>
+                            ) : (
+                              <option disabled>Tidak ada sesi tersedia</option>
                             )}
                           </select>
                         </div>
@@ -228,18 +188,10 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien }) => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button
-                  onClick={onClose}
-                  className="bg-transparent text-[#DC2626] font-semibold text-sm"
-                >
+                <Button onClick={onClose} className="bg-transparent text-[#DC2626] font-semibold text-sm">
                   Batal
                 </Button>
-                <Button
-                  onClick={handleBookingDadakanPasien}
-                  className="text-white bg-red-600"
-                  isLoading={loading}
-                  spinnerPlacement="end"
-                >
+                <Button onClick={handleBookingDadakanPasien} className="text-white bg-red-600" isLoading={loading} spinnerPlacement="end">
                   Simpan
                 </Button>
               </ModalFooter>

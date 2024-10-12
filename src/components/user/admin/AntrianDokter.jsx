@@ -1,84 +1,94 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import { Breadcrumbs, BreadcrumbItem, Card, CardBody, Input, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, getKeyValue, Spinner } from "@nextui-org/react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import {
+  Breadcrumbs,
+  BreadcrumbItem,
+  Card,
+  CardBody,
+  Input,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Pagination,
+  getKeyValue,
+  Spinner,
+} from "@nextui-org/react";
 import { FaHome, FaSearch } from "react-icons/fa";
 import { ModalPanggilanDokter } from "@/components/modal/panggillan-dokter/Modal-panggilan-dokter";
 import { getDokterTersedia } from "@/services/jadwal-praktek";
 import { getPasienReadyToDokter } from "@/services/antrian";
 
 export const AntrianDokterAdminPage = () => {
-    const [pasien, setPasien] = useState([]);
-    const [dokter, setDokter] = useState([]);
-    const [selectedDokter, setSelectedDokter] = useState(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const rowsPerPage = 5;
+  const [pasien, setPasien] = useState([]);
+  const [dokter, setDokter] = useState([]);
+  const [selectedDokter, setSelectedDokter] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const rowsPerPage = 5;
 
-    const handleSearch = (event) => {
-        setSearchTerm(event.target.value);
-        setPage(1);
-    };
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+    setPage(1);
+  };
 
-    const filteredData = useMemo(() => {
-        return pasien.filter(item => 
-            item.pasien.user.nama.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [searchTerm, pasien]);
+  const filteredData = useMemo(() => {
+    return pasien.filter((item) =>
+      item.pasien.user.nama.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, pasien]);
 
-    const pages = Math.ceil(filteredData.length / rowsPerPage);
+  const pages = Math.ceil(filteredData.length / rowsPerPage);
 
-    const items = useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        return filteredData.slice(start, end);
-    }, [page, filteredData]);
+  const items = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return filteredData.slice(start, end);
+  }, [page, filteredData]);
 
-    useEffect(() => {
-        if (page > pages && pages > 0) {
-            setPage(pages);
-        }
-    }, [filteredData, page, pages]);
-
-    const fetchDokter = async () => {
-        setLoading(true);
-        try {
-            const res = await getDokterTersedia();
-            setDokter(res);
-            setSelectedDokter(res[0]?.id || null); 
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
+  const fetchDokter = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getDokterTersedia();
+      setDokter(res);
+      setSelectedDokter(res[0]?.id || null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    const fetchPasien = async (dokterId) => {
-        setLoading(true);
-        try {
-            const res = await getPasienReadyToDokter(dokterId);
-            setPasien(res);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
+  const fetchPasien = useCallback(async (dokterId) => {
+    if (!dokterId) return;
+    setLoading(true);
+    try {
+      const res = await getPasienReadyToDokter(dokterId);
+      setPasien(res);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    const handleChangeDokter = (event) => {
-        setSelectedDokter(event.target.value);
+  const handleChangeDokter = (event) => {
+    setSelectedDokter(event.target.value);
+  };
+
+  useEffect(() => {
+    fetchDokter();
+  }, [fetchDokter]);
+
+  useEffect(() => {
+    if (selectedDokter) {
+      fetchPasien(selectedDokter);
     }
-
-    useEffect(() => {
-        fetchDokter();
-    }, []);
-
-    useEffect(() => {
-        if (selectedDokter) {
-            fetchPasien(selectedDokter);
-        }
-    }, [selectedDokter]);
+  }, [selectedDokter, fetchPasien]);
 
     return (
         <div className="p-6">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Breadcrumbs,
   BreadcrumbItem,
@@ -21,13 +21,31 @@ import {
 import { FaHome, FaSearch, FaClipboardList } from "react-icons/fa";
 import Link from "next/link";
 import { getPasienPemeriksaanDokter } from "@/services/pemeriksaan";
+import toast from "react-hot-toast";
 
 export const PemeriksaanDokterPage = () => {
   const [pasien, setPasien] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const rowsPerPage = 5;
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const pasienRes = await getPasienPemeriksaanDokter();
+      setPasien(pasienRes);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -44,31 +62,23 @@ export const PemeriksaanDokterPage = () => {
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    return filteredData.slice(start, end);
+    return filteredData.slice(start, start + rowsPerPage);
   }, [page, filteredData]);
 
   useEffect(() => {
     if (page > pages && pages > 0) {
       setPage(pages);
     }
-  }, [filteredData, page, pages]);
+  }, [page, pages]);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const pasienRes = await getPasienPemeriksaanDokter();
-      setPasien(pasienRes);
-    } catch (error) {
-      return error;
-    } finally {
-      setLoading(false);
-    }
+  const handleLoading = () => {
+    const loadingToast = toast.loading("Mengakses halaman diagnosa pasien...");
+    setIsNavigating(true);
+    setTimeout(() => {
+      setIsNavigating(false);
+      toast.dismiss(loadingToast);
+    }, 2000); 
   };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   return (
     <div className="p-6">
@@ -93,8 +103,7 @@ export const PemeriksaanDokterPage = () => {
           <Card radius="sm" shadow="sm">
             <CardBody className="flex justify-center items-center">
               <p className="text-[#334155] font-semibold text-lg">
-                No. Antrian Pasien Saat Ini:{" "}
-                {pasien.length === 0 ? 0 : pasien[0].nomor_antrian}
+                No. Antrian Pasien Saat Ini: {pasien.length === 0 ? 0 : pasien[0].nomor_antrian}
               </p>
             </CardBody>
           </Card>
@@ -110,23 +119,21 @@ export const PemeriksaanDokterPage = () => {
           />
         </div>
       </div>
+
       <div>
         <Card className="w-full mt-8 lg:hidden" radius="sm">
           <CardBody>
             <div className="flex flex-col justify-center">
-              <div>
-                <Input
-                  type="text"
-                  startContent={<FaSearch className="text-slate-500" />}
-                  radius="sm"
-                  value={searchTerm}
-                  onChange={handleSearch}
-                />
-              </div>
+              <Input
+                type="text"
+                startContent={<FaSearch className="text-slate-500" />}
+                radius="sm"
+                value={searchTerm}
+                onChange={handleSearch}
+              />
               <div className="flex justify-center bg-[#F4F4F5] mt-2 rounded-md p-1">
                 <p className="text-[#334155] font-semibold text-lg">
-                  No. Antrian Pasien Saat Ini:{" "}
-                  {pasien.length === 0 ? 0 : pasien[0].nomor_antrian}
+                  No. Antrian Pasien Saat Ini: {pasien.length === 0 ? 0 : pasien[0].nomor_antrian}
                 </p>
               </div>
             </div>
@@ -134,7 +141,7 @@ export const PemeriksaanDokterPage = () => {
         </Card>
 
         <div className="mt-4">
-          {loading ? (
+          {loading || isNavigating ? ( // Check both loading and navigating
             <div className="flex justify-center items-center min-h-[222px]">
               <Spinner size="lg" />
             </div>
@@ -150,13 +157,11 @@ export const PemeriksaanDokterPage = () => {
                     color="primary"
                     page={page}
                     total={pages}
-                    onChange={(page) => setPage(page)}
+                    onChange={setPage}
                   />
                 </div>
               }
-              classNames={{
-                wrapper: "min-h-[360px]",
-              }}
+              classNames={{ wrapper: "min-h-[360px]" }}
             >
               <TableHeader>
                 <TableColumn>No Antrian</TableColumn>
@@ -165,30 +170,24 @@ export const PemeriksaanDokterPage = () => {
                 <TableColumn>No Telp</TableColumn>
                 <TableColumn>Aksi</TableColumn>
               </TableHeader>
-              <TableBody
-                items={items}
-                emptyContent={"Tidak Ada Antrian Pasien"}
-              >
+              <TableBody items={items} emptyContent={"Tidak Ada Antrian Pasien"}>
                 {items.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>{getKeyValue(item, "nomor_antrian")}</TableCell>
                     <TableCell>{getKeyValue(item, "nomor_rm")}</TableCell>
+                    <TableCell>{getKeyValue(item.pasien.user, "nama")}</TableCell>
                     <TableCell>
-                      {getKeyValue(item.pasien.user, "nama")}
-                    </TableCell>
-                    <TableCell>
-                      {"0" +
-                        String(getKeyValue(item.pasien.user, "nomor")).replace(
-                          /^0+/,
-                          ""
-                        )}
+                      {"0" + String(getKeyValue(item.pasien.user, "nomor")).replace(/^0+/, "")}
                     </TableCell>
                     <TableCell>
                       <Tooltip placement="top" showArrow content={"Diagnosa"}>
                         <Link
                           href={`/dokter/pemeriksaan/${item.nomor_rm}/diagnosa?idPemeriksaan=${item.id}`}
                         >
-                          <button className="p-2 bg-orange-500 rounded hover:opacity-80">
+                          <button
+                            className="p-2 bg-orange-500 rounded hover:opacity-80"
+                            onClick={handleLoading}
+                          >
                             <FaClipboardList className="text-white " />
                           </button>
                         </Link>

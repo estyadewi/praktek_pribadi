@@ -35,18 +35,19 @@ export const ModalHistoryPasien = ({ idPasien }) => {
     return data.slice(start, end);
   }, [page, data]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const res = await getHistoryPasien(idPasien);
       setData(res.filter((item) => item.status === "Pembayaran Telah Selesai") || []);
     } catch (error) {
-      return error;
+      console.error("Error fetching patient history:", error);
     }
-  };
+  }, [idPasien]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
+  
   return (
     <>
       <button

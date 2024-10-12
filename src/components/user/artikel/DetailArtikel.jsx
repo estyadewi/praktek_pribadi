@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Breadcrumbs, BreadcrumbItem } from "@nextui-org/react";
 import { FaHome } from "react-icons/fa";
 import { getArtikelBySlug } from "@/services/artikel";
@@ -12,7 +12,7 @@ export const DetailArtikelPage = ({ slug }) => {
   const [data, setData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchArtikel = async () => {
+  const fetchArtikel = useCallback(async () => {
     try {
       setIsLoading(true);
       const res = await getArtikelBySlug(slug);
@@ -22,11 +22,11 @@ export const DetailArtikelPage = ({ slug }) => {
       setIsLoading(false);
       return error;
     }
-  };
+  }, [slug]);
 
   useEffect(() => {
     fetchArtikel();
-  }, []);
+  }, [fetchArtikel]);
 
   const SkeletonLoader = () => (
     <div className="flex flex-col space-y-4 animate-pulse w-full">

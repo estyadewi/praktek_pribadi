@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input } from "@nextui-org/react";
+import { Input, Spinner } from "@nextui-org/react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
@@ -15,6 +15,7 @@ export const GantiPasswordForm = () => {
   const [isVisible2, setIsVisible2] = useState(false);
   const toggleVisibility1 = () => setIsVisible1(!isVisible1);
   const toggleVisibility2 = () => setIsVisible2(!isVisible2);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({});
 
@@ -29,6 +30,7 @@ export const GantiPasswordForm = () => {
 
   const gantiPassword = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const res = await changePassword(form);
       if (res.status === "true") {
@@ -44,6 +46,8 @@ export const GantiPasswordForm = () => {
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,9 +143,16 @@ export const GantiPasswordForm = () => {
               <div className="col-span-6 sm:flex sm:items-center sm:gap-4">
                 <button
                   onClick={gantiPassword}
-                  className="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
+                  className="group inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
                 >
-                  Ubah Kata Sandi
+                  {loading ? (
+                    <div className="flex items-center">
+                      <Spinner size="sm" className="mr-2 text-white group-hover:text-blue-600" />{" "}
+                      Memproses...
+                    </div>
+                  ) : (
+                    "Ganti Kata Sandi"
+                  )}
                 </button>
               </div>
             </div>

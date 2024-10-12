@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { Input } from "@nextui-org/react";
+import React, { useState, useCallback } from "react";
+import { Input, Spinner } from "@nextui-org/react";
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 import Link from "next/link";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { login, cekToken, regenerateOTP } from "@/services/auth";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
@@ -12,69 +12,62 @@ import { useRouter } from "next/navigation";
 export const LoginForm = () => {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
-  const toggleVisibility = () => setIsVisible(!isVisible);
+  const [form, setForm] = useState({ nomor: "", password: "" });
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const [form, setForm] = useState({
-    nomor: "",
-    password: "",
-  });
+  const toggleVisibility = useCallback(() => setIsVisible((prev) => !prev), []);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { value, name } = e.target;
-    setForm({
-      ...form,
-      [name]: value,
-    });
-  };
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-  const handlePhoneChange = (e) => {
-    const inputValue = e.target.value;
-    const numericValue = inputValue.replace(/\D/g, '');
-    
-    let formattedValue = numericValue;
-    formattedValue = formattedValue.slice(0, 13);
-    
-    setForm((prevForm) => ({
-      ...prevForm,
-      nomor: formattedValue,
-    }));
-  };
+  const handlePhoneChange = useCallback((e) => {
+    const numericValue = e.target.value.replace(/\D/g, "").slice(0, 13);
+    setForm((prev) => ({ ...prev, nomor: numericValue }));
+  }, []);
 
-  const useLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await login(form.nomor, form.password);
-      if (res.status === "true") {
-        if(res.message === "Akun belum aktif"){
-          toast.error(res.message);
-          Cookies.set("activation-token", res.token);
-          await regenerateOTP("all");
-          router.push("/aktivasi-akun?otp=all");
+  const handleLogin = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setIsNavigating(true);
+      try {
+        const res = await login(form.nomor, form.password);
+        if (res.status === "true") {
+          if (res.message === "Akun belum aktif") {
+            toast.error(res.message);
+            Cookies.set("activation-token", res.token);
+            await regenerateOTP("all");
+            toast.success("OTP telah dikirim");
+            router.push("/aktivasi-akun");
+          } else {
+            const existingToken = Cookies.get("auth-token");
+            if (existingToken) {
+              Cookies.remove("auth-token");
+            }
+            Cookies.set("auth-token", res.token);
+            toast.success(res.message);
+
+            const data = await cekToken(res.token);
+            router.replace(
+              `/${data.role.toLowerCase().replace(" ", "-")}/dashboard`
+            );
+          }
         } else {
-          Cookies.set("auth-token", res.token);
-          toast.success(res.message);
-          const data = await cekToken(res.token);
-          if (data.role === "Pasien") {
-            router.push("/pasien/dashboard");
-          } else if (data.role === "Dokter") {
-            router.push("/dokter/dashboard");
-          } else if (data.role === "Admin") {
-            router.push("/admin/dashboard");
-          } else if (data.role === "Super User") {
-            router.push("/super-user/dashboard");
+          if (typeof res.error === "object") {
+            Object.values(res.error).forEach(toast.error);
+          } else {
+            throw new Error(res.error);
           }
         }
-      } else {
-        if (res.error instanceof Object) {
-          for (const key in res.error) {
-            toast.error(res.error[key]);
-          }
-        } else throw new Error(res.error);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setIsNavigating(false);
       }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
+    },
+    [form, router]
+  );
 
   return (
     <section className="bg-slate-50 min-h-dvh">
@@ -91,7 +84,7 @@ export const LoginForm = () => {
           <div className="max-w-xl lg:max-w-3xl">
             <h1 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
               Selamat datang di <br />
-              <Link href="/" className="font-bold text-blue-700 ">
+              <Link href="/" className="font-bold text-blue-700">
                 Praktek Pribadi
               </Link>{" "}
               🩺
@@ -102,7 +95,10 @@ export const LoginForm = () => {
               silakan masuk dengan memasukkan akun Anda di bawah ini.
             </p>
 
-            <form className="mt-8 grid grid-cols-6 gap-6 h-full">
+            <form
+              onSubmit={handleLogin}
+              className="mt-8 grid grid-cols-6 gap-6 h-full"
+            >
               <div className="col-span-6">
                 <label
                   htmlFor="nomor"
@@ -110,7 +106,6 @@ export const LoginForm = () => {
                 >
                   Nomor Telepon
                 </label>
-
                 <Input
                   type="tel"
                   inputMode="numeric"
@@ -126,9 +121,8 @@ export const LoginForm = () => {
                   startContent={
                     <span className="text-slate-700 text-sm">+62</span>
                   }
-                  classNames={{
-                    inputWrapper: "border",
-                  }}
+                  classNames={{ inputWrapper: "border" }}
+                  disabled={isNavigating}
                 />
               </div>
 
@@ -139,7 +133,6 @@ export const LoginForm = () => {
                 >
                   Kata Sandi
                 </label>
-
                 <Input
                   variant="bordered"
                   name="password"
@@ -148,14 +141,13 @@ export const LoginForm = () => {
                   className="bg-white"
                   onChange={handleChange}
                   value={form.password}
-                  classNames={{
-                    inputWrapper: "border",
-                  }}
+                  classNames={{ inputWrapper: "border" }}
                   endContent={
                     <button
                       className="focus:outline-none"
                       type="button"
                       onClick={toggleVisibility}
+                      disabled={isNavigating}
                     >
                       {isVisible ? (
                         <MdOutlineVisibilityOff className="text-2xl text-default-400 pointer-events-none" />
@@ -165,23 +157,34 @@ export const LoginForm = () => {
                     </button>
                   }
                   type={isVisible ? "text" : "password"}
+                  disabled={isNavigating}
                 />
               </div>
 
               <div className="col-span-6 flex justify-end">
-                <Link href="/lupa-password">
-                  <p className="hover:underline text-slate-500 text-sm">
-                    Lupa Kata Sandi?
-                  </p>
+                <Link 
+                  href="/lupa-password"
+                  className={`hover:underline text-slate-500 text-sm ${isNavigating ? 'pointer-events-none opacity-50' : ''}`}
+                  onClick={(e) => isNavigating && e.preventDefault()}
+                >
+                  Lupa Kata Sandi?
                 </Link>
               </div>
 
               <div className="col-span-6 sm:flex sm:items-center sm:gap-4">
                 <button
-                  onClick={useLogin}
-                  className="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
+                  type="submit"
+                  className="group inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isNavigating}
                 >
-                  Masuk
+                  {isNavigating ? (
+                    <div className="flex items-center">
+                      <Spinner size="sm" className="mr-2 text-white group-hover:text-blue-600" />
+                      Memproses...
+                    </div>
+                  ) : (
+                    "Masuk"
+                  )}
                 </button>
               </div>
             </form>
@@ -190,7 +193,8 @@ export const LoginForm = () => {
                 Belum memiliki akun?
                 <Link
                   href="/daftar"
-                  className="text-indigo-500 hover:underline font-bold"
+                  className={`text-indigo-500 hover:underline font-bold ${isNavigating ? 'pointer-events-none opacity-50' : ''}`}
+                  onClick={(e) => isNavigating && e.preventDefault()}
                 >
                   {" "}
                   Daftar

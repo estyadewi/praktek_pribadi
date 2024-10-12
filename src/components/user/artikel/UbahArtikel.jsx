@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Breadcrumbs,
   BreadcrumbItem,
@@ -86,7 +86,7 @@ export const UbahArtikel = ({ id }) => {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const res = await getArtikelById(id);
       setData(res);
@@ -94,11 +94,11 @@ export const UbahArtikel = ({ id }) => {
     } catch (error) {
       return error;
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   return (
     <div className="p-6">

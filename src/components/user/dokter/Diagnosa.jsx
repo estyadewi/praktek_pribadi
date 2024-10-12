@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Breadcrumbs,
   BreadcrumbItem,
@@ -16,7 +17,6 @@ import {
 import { FaHome } from "react-icons/fa";
 import { getLayananByDokter } from "@/services/layanan";
 import { getAllObat } from "@/services/obat";
-import { useEffect, useState } from "react";
 import { ModalHistoryPasien } from "@/components/modal/pemeriksaan/Modal-riwayat-pasien";
 import { getPasienByNoRM } from "@/services/data-pasien";
 import { formatDate } from "@/lib/constants";
@@ -36,35 +36,12 @@ export const DiagnosaPasienPage = ({ noRM }) => {
   const [obat, setObat] = useState([]);
   const [resep, setResep] = useState("");
   const [selected, setSelected] = useState("Obat");
-  const handleSeleted = (value) => {
-    setSelected(value);
-    if(value === "Obat"){
-      setResep("")
-    }else if (value === "Resep"){
-      setObatUsed([])
-    }else if (value === "Obat+Resep"){
-      setResep("")
-      setObatUsed([])
-    } else if (value === "Tanpa Obat"){
-      setResep("")
-      setObatUsed([])
-    }
-  };
   const [scheduleVisit, setScheduleVisit] = useState(false);
-  const [jadwalKunjungan, setJadwalKunjungan] = useState({
-    tanggal: "",
-  });
+  const [jadwalKunjungan, setJadwalKunjungan] = useState({ tanggal: "" });
   const [loading, setLoading] = useState(true);
   const [loadingButton, setLoadingButton] = useState(false);
-
-  const [layananUsed, setLayananUsed] = useState([
-    {
-      layanan_id: "",
-    },
-  ]);
-
+  const [layananUsed, setLayananUsed] = useState([{ layanan_id: "" }]);
   const [obatUsed, setObatUsed] = useState([]);
-
   const [pemeriksaan, setPemeriksaan] = useState({
     tekanan_darah: "",
     berat_badan: "",
@@ -76,79 +53,91 @@ export const DiagnosaPasienPage = ({ noRM }) => {
     plan: "",
   });
 
-  const handleJadwalKunjunganChange = (e) => {
-    const { value, name } = e.target;
-    setJadwalKunjungan({
-      ...jadwalKunjungan,
-      [name]: value,
-    });
-  };
-
-  const handlePemeriksaanChange = (e) => {
-    const { value, name } = e.target;
-    setPemeriksaan({
-      ...pemeriksaan,
-      [name]: value,
-    });
-  };
-
-  const handleResepChange = (e) => {
-    setResep(e.target.value);
-  };
-
-  const handleLayananChange = (index, value) => {
-    const updatedLayanan = [...layananUsed];
-    updatedLayanan[index].layanan_id = value;
-    setLayananUsed(updatedLayanan);
-  };
-
-  const addLayanan = () => {
-    setLayananUsed([...layananUsed, { layanan_id: "" }]);
-  };
-
-  const removeLayanan = (index) => {
-    const updatedLayanan = layananUsed.filter((_, i) => i !== index);
-    setLayananUsed(updatedLayanan);
-  };
-
-  const handleObatChange = (index, field, value) => {
-    const updatedObat = [...obatUsed];
-    if (updatedObat.length === 0) {
-      updatedObat.push({ obat_id: "", jumlah: "" });
+  const handleSeleted = useCallback((value) => {
+    setSelected(value);
+    if (value === "Obat") {
+      setResep("");
+    } else if (value === "Resep") {
+      setObatUsed([]);
+    } else if (value === "Obat+Resep") {
+      setResep("");
+      setObatUsed([]);
+    } else if (value === "Tanpa Obat") {
+      setResep("");
+      setObatUsed([]);
     }
-    updatedObat[index][field === "id" ? "obat_id" : field] = value;
-    setObatUsed(updatedObat);
-  };
+  }, []);
 
-  const addObat = () => {
-    setObatUsed([...obatUsed, { obat_id: "", jumlah: "" }]);
-  };
+  const handleJadwalKunjunganChange = useCallback((e) => {
+    const { value, name } = e.target;
+    setJadwalKunjungan(prev => ({ ...prev, [name]: value }));
+  }, []);
 
-  const removeObat = (index) => {
-    const updatedObat = obatUsed.filter((_, i) => i !== index);
-    setObatUsed(updatedObat);
-  };
+  const handlePemeriksaanChange = useCallback((e) => {
+    const { value, name } = e.target;
+    setPemeriksaan(prev => ({ ...prev, [name]: value }));
+  }, []);
 
-  const handleScheduleVisitChange = (isSelected) => {
+  const handleResepChange = useCallback((e) => {
+    setResep(e.target.value);
+  }, []);
+
+  const handleLayananChange = useCallback((index, value) => {
+    setLayananUsed(prev => {
+      const updated = [...prev];
+      updated[index].layanan_id = value;
+      return updated;
+    });
+  }, []);
+
+  const addLayanan = useCallback(() => {
+    setLayananUsed(prev => [...prev, { layanan_id: "" }]);
+  }, []);
+
+  const removeLayanan = useCallback((index) => {
+    setLayananUsed(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleObatChange = useCallback((index, field, value) => {
+    setObatUsed(prev => {
+      const updated = [...prev];
+      if (updated.length === 0) {
+        updated.push({ obat_id: "", jumlah: "" });
+      }
+      updated[index][field === "id" ? "obat_id" : field] = value;
+      return updated;
+    });
+  }, []);
+
+  const addObat = useCallback(() => {
+    setObatUsed(prev => [...prev, { obat_id: "", jumlah: "" }]);
+  }, []);
+
+  const removeObat = useCallback((index) => {
+    setObatUsed(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleScheduleVisitChange = useCallback((isSelected) => {
     setScheduleVisit(isSelected);
     if (!isSelected) {
       setJadwalKunjungan({});
     }
-  };
+  }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const layananData = await getLayananByDokter();
-      const obatData = await getAllObat();
-      const pasienData = await getPasienByNoRM(noRM);
-      const pemeriksaanData = await getPemeriksaanByIdPemeriksaan(
-        idPemeriksaan
-      );
+      const [layananData, obatData, pasienData, pemeriksaanData] = await Promise.all([
+        getLayananByDokter(),
+        getAllObat(),
+        getPasienByNoRM(noRM),
+        getPemeriksaanByIdPemeriksaan(idPemeriksaan)
+      ]);
+
       setLayanan(layananData);
       setObat(obatData);
       setPasien(pasienData);
-      setPemeriksaan((prevPemeriksaan) => ({
-        ...prevPemeriksaan,
+      setPemeriksaan(prev => ({
+        ...prev,
         tekanan_darah: pemeriksaanData.pemeriksaan_awal.tekanan_darah || "",
         berat_badan: pemeriksaanData.pemeriksaan_awal.berat_badan || "",
         keluhan: pemeriksaanData.pemeriksaan_awal.keluhan || "",
@@ -156,27 +145,29 @@ export const DiagnosaPasienPage = ({ noRM }) => {
         hpm: pemeriksaanData.pemeriksaan_awal.hpm || "",
       }));
     } catch (error) {
-      return error;
+      console.error("Error fetching data:", error);
+      toast.error("Failed to load data. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [noRM, idPemeriksaan]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setLoadingButton(true);
-    if (scheduleVisit && jadwalKunjungan.tanggal === "") {
+    if (scheduleVisit && !jadwalKunjungan.tanggal) {
       setLoadingButton(false);
       return toast.error("Tanggal kunjungan tidak boleh kosong");
     }
+
     const data = {
       objective: pemeriksaan.objektif,
       assessment: pemeriksaan.assessment,
       plan: pemeriksaan.plan,
-      resep: resep,
+      resep,
       penjadwalan_kembali: jadwalKunjungan,
       pemeriksaan_awal: {
         tekanan_darah: pemeriksaan.tekanan_darah,
@@ -188,35 +179,43 @@ export const DiagnosaPasienPage = ({ noRM }) => {
       obat: obatUsed,
       layanan: layananUsed,
     };
+
+    // Remove empty fields
+    if (!data.pemeriksaan_awal.gpa && !data.pemeriksaan_awal.hpm) {
+      delete data.pemeriksaan_awal.gpa;
+      delete data.pemeriksaan_awal.hpm;
+    }
+    if (!data.resep) delete data.resep;
+    if (data.obat.length === 0) delete data.obat;
+    if (!scheduleVisit) delete data.penjadwalan_kembali;
+
     try {
-      if (
-        data.pemeriksaan_awal.gpa === "" &&
-        data.pemeriksaan_awal.hpm === ""
-      ) {
-        delete data.pemeriksaan_awal.gpa;
-        delete data.pemeriksaan_awal.hpm;
-      }
-      if (data.resep === "") delete data.resep;
-      if (data.obat.length === 0) delete data.obat;
-      if (scheduleVisit === false) delete data.penjadwalan_kembali;
       const res = await insertPemeriksaanDokter(data, idPemeriksaan);
       if (res.status === "true") {
         toast.success(res.message);
-        setLoadingButton(false);
         router.replace("/dokter/pemeriksaan");
       } else {
-        setLoadingButton(false);
-        if (res.error instanceof Object) {
-          for (const key in res.error) {
-            toast.error(res.error[key]);
-          }
-        } else throw new Error(res.error);
+        throw new Error(res.error);
       }
     } catch (error) {
+      console.error("Error submitting data:", error);
+      if (error.error instanceof Object) {
+        Object.values(error.error).forEach(toast.error);
+      } else {
+        toast.error(error.message || "An error occurred. Please try again.");
+      }
+    } finally {
       setLoadingButton(false);
-      toast.error(error.message);
     }
-  };
+  }, [pemeriksaan, resep, jadwalKunjungan, obatUsed, layananUsed, scheduleVisit, idPemeriksaan, router]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[50vh]">
+        <Spinner color="primary" size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
