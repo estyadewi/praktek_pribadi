@@ -38,7 +38,6 @@ export const RegisterForm = () => {
     if (numericValue.length > 0 && numericValue[0] !== '8') {
       formattedValue = '8' + numericValue.slice(1);
     }
-    
     formattedValue = formattedValue.slice(0, 13);
     
     setForm((prevForm) => ({
@@ -178,6 +177,7 @@ export const RegisterForm = () => {
                   radius="sm"
                   className="bg-white"
                   onChange={handlePhoneChange}
+                  value={form.nomor}
                   startContent={
                     <span className="text-slate-700 text-sm">+62</span>
                   }

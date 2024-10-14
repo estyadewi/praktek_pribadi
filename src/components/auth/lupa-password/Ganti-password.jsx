@@ -32,20 +32,25 @@ export const GantiPasswordForm = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await changePassword(form);
-      if (res.status === "true") {
-        toast.success(res.message);
-        Cookies.remove("verify-token");
-        router.push("/masuk");
-      } else {
-        if (res.error instanceof Object) {
-          for (const key in res.error) {
-            toast.error(res.error[key]);
+      await toast.promise(changePassword(form).then(
+        async (res) => {
+          if (res.status === "true") {
+            return Promise.resolve(res);
+          } else {
+            return Promise.reject(res);
           }
-        } else throw new Error(res.error);
-      }
-    } catch (error) {
-      toast.error(error.message);
+        }
+      ), {
+        loading: "Memproses...",
+        success: async (res) => {
+          if (res.status === "true") {
+            Cookies.remove("verify-token");
+            router.push("/masuk");
+            return res.message;
+          }
+        },
+        error: (err) => err.message,
+      });
     } finally {
       setLoading(false);
     }

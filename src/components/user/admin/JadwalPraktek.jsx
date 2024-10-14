@@ -301,7 +301,7 @@ export const JadwalPraktekPage = () => {
                       <ModalHapusJadwalDadakan
                         id={id}
                         tanggal={tanggal}
-                        refresh={fetchData}
+                        fetch={fetchData}
                       />
                       <Tooltip
                         placement="top"

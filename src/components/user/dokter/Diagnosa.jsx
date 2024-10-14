@@ -180,7 +180,6 @@ export const DiagnosaPasienPage = ({ noRM }) => {
       layanan: layananUsed,
     };
 
-    // Remove empty fields
     if (!data.pemeriksaan_awal.gpa && !data.pemeriksaan_awal.hpm) {
       delete data.pemeriksaan_awal.gpa;
       delete data.pemeriksaan_awal.hpm;

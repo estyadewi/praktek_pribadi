@@ -34,11 +34,11 @@ export const ModalDetailRiwayatPasien = ({data}) => {
                         </div>
                         <div>
                             <p className="font-semibold">GPA</p>
-                            <p className="text-slate-700 text-sm font-normal">{data.pemeriksaan_awal.gpa}</p>
+                            <p className="text-slate-700 text-sm font-normal">{data.pemeriksaan_awal.gpa || "-"}</p>
                         </div>
                         <div>
                             <p className="font-semibold">HPM</p>
-                            <p className="text-slate-700 text-sm font-normal">{formatDate(data.pemeriksaan_awal.hpm)}</p>
+                            <p className="text-slate-700 text-sm font-normal">{data.pemeriksaan_awal.hpm ? formatDate(data.pemeriksaan_awal.hpm) : "-"}</p>
                         </div>
                     </div>
                     <div className="mt-4 flex flex-col gap-4">
@@ -48,7 +48,7 @@ export const ModalDetailRiwayatPasien = ({data}) => {
                         </div>
                         <div>
                             <p className="font-semibold">Objektif</p>
-                            <p className="break-words text-slate-700 text-sm font-normal">{data.objektif}</p>
+                            <p className="break-words text-slate-700 text-sm font-normal">{data.objective}</p>
                         </div>
                         <div>
                             <p className="font-semibold">Assessment</p>
@@ -59,18 +59,18 @@ export const ModalDetailRiwayatPasien = ({data}) => {
                             <p className="break-words text-slate-700 text-sm font-normal">{data.plan}</p>
                         </div>
                         <div>
-                          {data.penggunaan_obat > 0 ? (
+                          {data.penggunaan_obat.length > 0 ? (
                             <div>
                               <p className="font-semibold">Obat</p>
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   {data.penggunaan_obat.map((item) => (
-                                    <p key={item.id} className="text-slate-700 text-sm font-normal">{item.nama_obat}</p>
+                                    <p key={item.obat.id} className="text-slate-700 text-sm font-normal">{item.obat.nama}</p>
                                   ))}
                                 </div>
                                 <div className="space-y-2">
                                   {data.penggunaan_obat.map((item) => (
-                                    <p key={item.id} className="text-slate-700 text-sm font-normal">{item.jumlah} {item.satuan}</p>
+                                    <p key={item.id} className="text-slate-700 text-sm font-normal">{item.jumlah} {item.obat.satuan}</p>
                                   ))}
                                 </div>
                               </div>

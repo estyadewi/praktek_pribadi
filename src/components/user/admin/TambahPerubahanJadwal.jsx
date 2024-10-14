@@ -65,31 +65,35 @@ export const TambahPerubahanJadwal = () => {
                 sesi: sesi,
                 dokter_id: idDokter
             };
-            const res = await addJadwalDadakan(data);
-            if (res.status === 'success') {
-                toast.success(res.message);
-                router.replace('/admin/jadwal-praktek');
-                setTanggal('');
-                setSesi([
-                    {
-                        waktu_mulai: '',
-                        waktu_selesai: '',
-                        kuota: 0
+            await toast.promise(addJadwalDadakan(data).then(
+                async (res) => {
+                    if (res.status === 'success') {
+                        return Promise.resolve(res);
+                    } else {
+                        return Promise.reject(res);
                     }
-                ]);
-                setDisabled(false);
-                setLoading(false);
-                
-            } else {
-                setLoading(false);
-                if (res.error instanceof Object) {
-                    for (const key in res.error) {
-                        toast.error(res.error[key]);
-                    }
-                } else throw new Error(res.error);
-            }
-        } catch (error) {
-            toast.error(error.message);
+                }
+            ), {
+                loading: 'Menyimpan...',
+                success: (res) => {
+                    if (res.status === 'success') {
+                        router.replace('/admin/jadwal-praktek');
+                        return res.message;
+                    } 
+                },
+                error: (err) => err.error,
+            });
+        } finally {
+            setTanggal('');
+            setSesi([
+                {
+                    waktu_mulai: '',
+                    waktu_selesai: '',
+                    kuota: 0
+                }
+            ]);
+            setDisabled(false);
+            setLoading(false);
         }
     }
 
@@ -113,6 +117,7 @@ export const TambahPerubahanJadwal = () => {
                                     </label>
                                     <Input
                                         value={tanggal}
+                                        disabled={loading}
                                         type="date"
                                         id='tanggal'
                                         variant="bordered"
@@ -134,7 +139,7 @@ export const TambahPerubahanJadwal = () => {
                                         }}
                                     />
                                 </div>
-                                <Checkbox className='mt-2' onChange={handleCheckboxChange}>
+                                <Checkbox className='mt-2' onChange={handleCheckboxChange} isDisabled={loading}>
                                     <span className='text-xs sm:text-sm font-medium text-slate-700 whitespace-nowrap'>Tidak Ada Praktek</span>
                                 </Checkbox>
                             </div>
@@ -160,7 +165,7 @@ export const TambahPerubahanJadwal = () => {
                                 </div>
 
                                 <div>
-                                    <Button className='bg-orange-500 text-white w-full disabled:opacity-80' onClick={handleAddSesi} disabled={disabled}>
+                                    <Button className='bg-orange-500 text-white w-full disabled:opacity-80 disabled:cursor-not-allowed' onClick={handleAddSesi} disabled={disabled || loading}>
                                         Tambah Slot
                                     </Button>
                                 </div>
@@ -180,6 +185,7 @@ export const TambahPerubahanJadwal = () => {
                                         <Input
                                             id='waktu_mulai'
                                             type="time"
+                                            disabled={loading}
                                             variant="bordered"
                                             name="waktu_mulai"
                                             size="md"
@@ -199,6 +205,7 @@ export const TambahPerubahanJadwal = () => {
                                         <Input
                                             id='waktu_selesai'
                                             type="time"
+                                            disabled={loading}
                                             variant="bordered"
                                             name="waktu_selesai"
                                             size="md"
@@ -218,6 +225,7 @@ export const TambahPerubahanJadwal = () => {
                                         <Input
                                             id='kuota'
                                             type="number"
+                                            disabled={loading}
                                             variant="bordered"
                                             name="kuota"
                                             size="md"
@@ -231,7 +239,7 @@ export const TambahPerubahanJadwal = () => {
                                         />
                                     </div>
                                     <div className='grid grid-cols-3 mt-6 sm:mt-7'>
-                                        <Button className='text-white bg-[#EF4444] w-full disabled:opacity-80' onClick={() => handleRemoveSesi(index)} disabled={sesi.length == 1 ? true : false}>
+                                        <Button className='text-white bg-[#EF4444] w-full disabled:opacity-80 disabled:cursor-not-allowed' onClick={() => handleRemoveSesi(index)} disabled={sesi.length == 1 || loading}>
                                             Hapus
                                         </Button>
                                     </div>

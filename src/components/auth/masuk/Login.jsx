@@ -32,36 +32,39 @@ export const LoginForm = () => {
       e.preventDefault();
       setIsNavigating(true);
       try {
-        const res = await login(form.nomor, form.password);
-        if (res.status === "true") {
-          if (res.message === "Akun belum aktif") {
-            toast.error(res.message);
-            Cookies.set("activation-token", res.token);
-            await regenerateOTP("all");
-            toast.success("OTP telah dikirim");
-            router.push("/aktivasi-akun?otp=all");
-          } else {
-            const existingToken = Cookies.get("auth-token");
-            if (existingToken) {
-              Cookies.remove("auth-token");
+        await toast.promise(
+          login(form.nomor, form.password).then(async (res) => {
+            if (res.status === "true") {
+              return Promise.resolve(res)
+            } else {
+              return Promise.reject(res)
             }
-            Cookies.set("auth-token", res.token);
-            toast.success(res.message);
-
-            const data = await cekToken(res.token);
-            router.replace(
-              `/${data.role.toLowerCase().replace(" ", "-")}/dashboard`
-            );
+          }),
+          {
+            loading: "Melakukan login...",
+            success: async (res) => {
+              if (res.message === "Akun belum aktif") {
+                toast.error(res.message);
+                Cookies.set("activation-token", res.token);
+                await regenerateOTP("all");
+                router.push("/aktivasi-akun?otp=all");
+                return "OTP telah dikirim";
+              } else {
+                const existingToken = Cookies.get("auth-token");
+                if (existingToken) {
+                  Cookies.remove("auth-token");
+                }
+                Cookies.set("auth-token", res.token);
+                const data = await cekToken(res.token);
+                router.replace(
+                  `/${data.role.toLowerCase().replace(" ", "-")}/dashboard`
+                );
+                return res.message;
+              }
+            },
+            error: (err) => err.message,
           }
-        } else {
-          if (typeof res.error === "object") {
-            Object.values(res.error).forEach(toast.error);
-          } else {
-            throw new Error(res.error);
-          }
-        }
-      } catch (error) {
-        toast.error(error.message);
+        );
       } finally {
         setIsNavigating(false);
       }

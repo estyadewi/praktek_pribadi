@@ -82,7 +82,7 @@ export const JadwalSayaPasien = () => {
                       <FaInfoCircle className="text-lg mr-2" />
                       Pemberitahuan:
                       <span className="font-normal text-center">
-                        Tersisa antrian {data[0].sisa_pasien} lagi sebelum anda dipanggil, harap
+                        Tersisa antrian {data[0].sisa_pasien} lagi sebelum anda dipanggil ke ruang dokter, harap
                         bersiap-siap
                       </span>
                     </div>
