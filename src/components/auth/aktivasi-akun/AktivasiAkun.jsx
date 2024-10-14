@@ -11,6 +11,7 @@ import { aktivasiAkun, regenerateOTP } from "@/services/auth";
 export const AktivasiAkun = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const [form, setForm] = useState({
     otp: "",
   });
@@ -34,20 +35,30 @@ export const AktivasiAkun = () => {
     setLoading(true);
     if (form.otp.length !== 4) {
       toast.error("OTP harus terdiri dari 4 digit");
+      setLoading(false);
       return;
     }
     try {
-      const res = await aktivasiAkun(form.otp);
-      if (res.status === "true") {
-        toast.success(res.message);
-        Cookies.remove("activation-token");
-        Cookies.set("auth-token", res.token);
-        router.push("/pasien/dashboard");
-      } else {
-        throw new Error(res.error);
-      }
-    } catch (error) {
-      toast.error(error.message);
+      await toast.promise(aktivasiAkun(form.otp).then(
+        async (res) => {
+          if (res.status === "true") {
+            return Promise.resolve(res);
+          } else {
+            return Promise.reject(res);
+          }
+        }
+      ), {
+        loading: "Memverifikasi OTP...",
+        success: async (res) => {
+          if (res.status === "true") {
+            Cookies.remove("activation-token");
+            Cookies.set("auth-token", res.token);
+            router.replace("/pasien/dashboard");
+            return res.message;
+          }
+        },
+        error: (err) => err.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -56,18 +67,22 @@ export const AktivasiAkun = () => {
   const resendOTP = async (e) => {
     e.preventDefault();
     try {
-      const res = await regenerateOTP(sendBy);
-      if (res.status === "true") {
-        toast.success(res.message);
-      } else {
-        if (res.error instanceof Object) {
-          for (const key in res.error) {
-            toast.error(res.error[key]);
+      setDisabled(true);
+      await toast.promise(regenerateOTP(sendBy).then(
+        async (res) => {
+          if (res.status === "true") {
+            return Promise.resolve(res);
+          } else {
+            return Promise.reject(res);
           }
-        } else throw new Error(res.error);
-      }
-    } catch (error) {
-      toast.error(error.message);
+        }
+      ),{
+        loading: "Mengirim ulang OTP...",
+        success: (res) => res.message,
+        error: (err) => err.message,
+      });
+    } finally {
+      setDisabled(false);
     }
   };
 
@@ -124,7 +139,8 @@ export const AktivasiAkun = () => {
                   Kode OTP Belum Masuk?{" "}
                   <button
                     onClick={resendOTP}
-                    className="text-indigo-500 hover:underline font-bold"
+                    className="text-indigo-500 hover:underline font-bold disabled:opacity-50"
+                    disabled={disabled}
                   >
                     {" "}
                     Kirim Ulang!

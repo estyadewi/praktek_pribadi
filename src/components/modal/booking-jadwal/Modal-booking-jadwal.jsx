@@ -39,13 +39,16 @@ export const ModalBookingJadwal = ({
         tanggal_pemeriksaan: tanggal,
       };
       const res = await bookJadwal(data);
-      setData(res.data);  
+      setData(res.data);
       if (res.status === "true") {
         toast.success(res.message);
         setLoading(false);
         onOpenChange(false);
         fetch();
-      } else if(res.status === "false" && res.data.status === "Janji Temu Dijadwalkan"){
+      } else if (
+        res.status === "false" &&
+        res.data.status === "Janji Temu Dijadwalkan"
+      ) {
         setIsReschedule(true);
         onOpenChange(false);
         setLoading(false);
@@ -95,46 +98,135 @@ export const ModalBookingJadwal = ({
         isDismissable={false}
         isKeyboardDismissDisabled={true}
         placement="center"
-        className="mx-5"
+        className="mx-5 sm:mx-auto w-full max-w-lg p-4"
       >
-        <ModalContent>
+        <ModalContent className="rounded-lg shadow-lg bg-white dark:bg-gray-800">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
+              <ModalHeader className="flex flex-col gap-2 text-center p-4 text-xl font-semibold text-gray-900 dark:text-white">
                 Daftar Jadwal Pemeriksaan
               </ModalHeader>
-              <ModalBody>
-                <div className="text-slate-700 overflow-y-auto max-h-80">
-                  <p className="text-justify mb-4">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Nullam pulvinar risus non risus hendrerit venenatis.
-                    Pellentesque sit amet hendrerit risus, sed porttitor quam.
+
+              <ModalBody className="modal-body overflow-y-auto max-h-80 p-6 space-y-6 text-slate-700 dark:text-slate-300">
+                <div className="text-start space-y-6">
+                  <h2 className="font-semibold text-xl text-slate-800">
+                    Syarat dan Ketentuan Pendaftaran Sesi Pasien
+                  </h2>
+                  <p>
+                    Dengan melakukan pendaftaran sesi konsultasi atau perawatan
+                    di praktek dokter spesialis melalui platform ini, Anda
+                    setuju untuk mematuhi dan terikat oleh syarat dan ketentuan
+                    berikut:
                   </p>
-                  <p className="text-justify mb-4">
-                    Magna exercitation reprehenderit magna aute tempor cupidatat
-                    consequat elit dolor adipisicing. Mollit dolor eiusmod sunt
-                    ex incididunt cillum quis. Velit duis sit officia eiusmod
-                    Lorem aliqua enim laboris do dolor eiusmod. Et mollit
-                    incididunt nisi consectetur esse laborum eiusmod pariatur
-                    proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
-                  </p>
+
+                  <div className="space-y-3">
+                    <h3 className="font-medium text-lg text-slate-700">
+                      1. Pendaftaran Sesi
+                    </h3>
+                    <ul className="list-disc list-outside pl-6 space-y-2">
+                      <li>
+                        Pendaftaran dilakukan secara online melalui platform
+                        ini. Anda hanya dapat memiliki{" "}
+                        <strong>1 pendaftaran aktif</strong>; harap batalkan
+                        pendaftaran aktif sebelum membuat pendaftaran baru.
+                      </li>
+                      <li>
+                        Jika Anda telah melakukan pendaftaran tetapi tidak hadir
+                        pada jadwal yang telah ditentukan, pendaftaran tersebut
+                        akan otomatis dibatalkan pada hari berikutnya.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="font-medium text-lg text-slate-700">
+                      2. Konfirmasi dan Kedatangan
+                    </h3>
+                    <ul className="list-disc list-outside pl-6 space-y-2">
+                      <li>
+                        Pasien yang akan pasang/lepas IUD wajib konfirmasi
+                        <strong> 6 jam sebelum kedatangan </strong> melalui
+                        WhatsApp di 082137049037.
+                      </li>
+                      <li>
+                        Nomor antrian pemeriksaan/konsultasi akan diberikan
+                        berdasarkan
+                        <strong> urutan kedatangan </strong> saat daftar ulang
+                        di tempat.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="font-medium text-lg text-slate-700">
+                      3. Antrian Pasien
+                    </h3>
+                    <p>
+                      Setelah mendapatkan nomor antrian dan selesai pemeriksaan
+                      awal, ketika sisa antrian tinggal{" "}
+                      <strong>kurang dari 2 pasien di depan Anda</strong>,
+                      notifikasi akan dikirim melalui <em>SMS dan email</em>.
+                    </p>
+                    <p>
+                      Pada bagian <strong>Jadwal Saya</strong> di platform,
+                      akan muncul pemberitahuan sisa antrian sebelum Anda
+                      dipanggil masuk ke ruangan dokter.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="font-medium text-lg text-slate-700">
+                      4. Perubahan Jadwal
+                    </h3>
+                    <ul className="list-disc list-outside pl-6 space-y-2">
+                      <li>
+                        Jam pemeriksaan/konsultasi dapat berubah sewaktu-waktu
+                        jika dokter memiliki{" "}
+                        <strong>tindakan operasi darurat</strong> di RS.
+                      </li>
+                      <li>
+                        Jika ada perubahan jadwal, pendaftaran sesi yang ada
+                        pada jadwal tersebut akan otomatis dibatalkan, dan Anda
+                        harus melakukan pendaftaran sesi baru sesuai dengan sesi
+                        yang tersedia.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="font-medium text-lg text-slate-700">
+                      5. Kesehatan Pasien
+                    </h3>
+                    <p>
+                      Jika Anda mengalami{" "}
+                      <strong>demam, batuk, atau pilek berat</strong>, harap
+                      bersedia menjadwalkan ulang demi kenyamanan pasien lain,
+                      terutama yang sedang hamil.
+                    </p>
+                  </div>
                 </div>
-                <Checkbox size="sm" onChange={handleCheckboxChange}>
-                  <p className="text-sm text-slate-700 font-medium">
+
+                <Checkbox
+                  size="sm"
+                  onChange={handleCheckboxChange}
+                  className="mt-4"
+                >
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     Saya setuju dengan Syarat dan Ketentuan yang ada
                   </p>
                 </Checkbox>
               </ModalBody>
-              <ModalFooter>
+
+              <ModalFooter className="flex justify-end gap-4 p-4 border-t border-gray-300 dark:border-gray-700">
                 <Button
                   onClick={onClose}
-                  className="bg-transparent text-[#DC2626] font-semibold text-sm"
+                  className="bg-transparent text-red-500 font-semibold text-sm hover:underline"
                 >
                   Batal
                 </Button>
                 <Button
                   onClick={handleBookingJadwal}
-                  className="text-white bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:opacity-50"
+                  className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-sm px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   isLoading={loading}
                   spinnerPlacement="end"
                   disabled={!isChecked}
@@ -146,12 +238,13 @@ export const ModalBookingJadwal = ({
           )}
         </ModalContent>
       </Modal>
-      <ModalRescheduleBookingJadwal 
-        fetch={fetch} 
-        idJadwal={idJadwal} 
-        tanggal={tanggal} 
-        isOpen={isReschedule} 
-        dataPemeriksaan={data} 
+
+      <ModalRescheduleBookingJadwal
+        fetch={fetch}
+        idJadwal={idJadwal}
+        tanggal={tanggal}
+        isOpen={isReschedule}
+        dataPemeriksaan={data}
         onClose={handleRescheduleModalClose}
       />
     </>

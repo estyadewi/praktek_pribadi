@@ -57,6 +57,12 @@ export const ModalUbahPasien = ({ fetch, pasien }) => {
   };
 
   const handleUbahDataPasien = async (e) => {
+    for (const key in data) {
+      if (data[key] === "" || data[key] === null) {
+        delete data[key];
+      }
+    }
+    console.log(data)
     e.preventDefault();
     try {
       setLoading(true);

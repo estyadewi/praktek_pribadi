@@ -16,14 +16,18 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { getJadwalByTanggal } from "@/services/jadwal-praktek";
 import { insertBookingDadakanPasien } from "@/services/data-pasien";
 
-export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) => {
+export const ModalBookingJadwalMendadakPasien = ({
+  fetch,
+  idPasien,
+  dokter,
+}) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [loading, setLoading] = useState(false);
   const [loadingSesi, setLoadingSesi] = useState(false);
   const [state, setState] = useState({
-    tanggal_pemeriksaan: '',
-    dokter_id: dokter[0]?.id || '',
-    sesi_id: '',
+    tanggal_pemeriksaan: "",
+    dokter_id: dokter[0]?.id || "",
+    sesi_id: "",
   });
   const [sesi, setSesi] = useState([]);
 
@@ -44,23 +48,22 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) =>
 
     setLoading(true);
     try {
+      console.log(dataBooking);
       const res = await insertBookingDadakanPasien(dataBooking);
       if (res.status === "true") {
         toast.success(res.message);
         fetch();
         onOpenChange();
-        setState({ tanggal_pemeriksaan: '', dokter_id: dokter[0]?.id || '', sesi_id: '' });
+        setState({
+          tanggal_pemeriksaan: "",
+          dokter_id: dokter[0]?.id || "",
+          sesi_id: "",
+        });
       } else {
-        throw new Error(res.error);
+        toast.error(res.message);
       }
     } catch (error) {
-      if (error instanceof Object) {
-        for (const key in error) {
-          toast.error(error[key]);
-        }
-      } else {
-        toast.error(error.message);
-      }
+      return toast.error("Error booking: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -70,7 +73,11 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) =>
     if (state.dokter_id && state.tanggal_pemeriksaan) {
       setLoadingSesi(true);
       try {
-        const res = await getJadwalByTanggal(state.dokter_id, state.tanggal_pemeriksaan);
+        setState((prev) => ({ ...prev, sesi_id: "" }));
+        const res = await getJadwalByTanggal(
+          state.dokter_id,
+          state.tanggal_pemeriksaan
+        );
         setSesi(res.sesi);
       } catch (error) {
         toast.error("Error fetching sesi: " + error.message);
@@ -87,14 +94,21 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) =>
   const handleModalClose = (openStatus) => {
     if (!openStatus) {
       onOpenChange();
-      setState({ tanggal_pemeriksaan: '', dokter_id: dokter[0]?.id || '', sesi_id: '' });
+      setState({
+        tanggal_pemeriksaan: "",
+        dokter_id: dokter[0]?.id || "",
+        sesi_id: "",
+      });
     }
   };
 
   return (
     <>
       <Tooltip showArrow content="Booking Jadwal Mendadak" placement="top">
-        <button onClick={onOpen} className="bg-red-600 p-2 rounded hover:opacity-80">
+        <button
+          onClick={onOpen}
+          className="bg-red-600 p-2 rounded hover:opacity-80"
+        >
           <FaCalendarAlt className="text-white" />
         </button>
       </Tooltip>
@@ -109,11 +123,16 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) =>
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Daftar Booking Pasien</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">
+                Daftar Booking Pasien
+              </ModalHeader>
               <ModalBody>
                 <div className="flex flex-col gap-5">
                   <div>
-                    <label htmlFor="dokter" className="block text-sm font-medium text-slate-700 mb-2">
+                    <label
+                      htmlFor="dokter"
+                      className="block text-sm font-medium text-slate-700 mb-2"
+                    >
                       Pilih Dokter <span className="text-red-700">*</span>
                     </label>
                     <select
@@ -132,7 +151,10 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) =>
                   </div>
 
                   <div>
-                    <label htmlFor="tanggal" className="block text-sm font-medium text-slate-700 mb-2">
+                    <label
+                      htmlFor="tanggal"
+                      className="block text-sm font-medium text-slate-700 mb-2"
+                    >
                       Tanggal Booking <span className="text-red-700">*</span>
                     </label>
                     <Input
@@ -157,7 +179,10 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) =>
                         </div>
                       ) : (
                         <div>
-                          <label htmlFor="sesi" className="block text-sm font-medium text-slate-700 mb-2">
+                          <label
+                            htmlFor="sesi"
+                            className="block text-sm font-medium text-slate-700 mb-2"
+                          >
                             Pilih Sesi <span className="text-red-700">*</span>
                           </label>
                           <select
@@ -166,19 +191,25 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) =>
                             id="sesi"
                             className="h-10 w-full rounded-md border-r-8 border-transparent px-3 text-sm outline-1 outline outline-slate-200 shadow-sm hover:outline-slate-400 focus:outline-slate-400 focus:shadow-outline-slate-200"
                           >
-                            {sesi.filter((item) => item.sisa_kuota !== 0).length > 0 ? (
+                            {sesi.filter((item) => item.sisa_kuota !== 0)
+                              .length > 0 ? (
                               <>
-                                <option value="" disabled hidden>
+                                <option value="" selected disabled hidden>
                                   Pilih Sesi
                                 </option>
-                                {sesi.filter((item) => item.sisa_kuota !== 0).map((item) => (
-                                  <option key={item.id} value={item.id}>
-                                    {item.waktu_mulai.slice(0, 5)} - {item.waktu_selesai.slice(0, 5)}
-                                  </option>
-                                ))}
+                                {sesi
+                                  .filter((item) => item.sisa_kuota !== 0)
+                                  .map((item) => (
+                                    <option key={item.id} value={item.id}>
+                                      {item.waktu_mulai.slice(0, 5)} -{" "}
+                                      {item.waktu_selesai.slice(0, 5)}
+                                    </option>
+                                  ))}
                               </>
                             ) : (
-                              <option disabled>Tidak ada sesi tersedia</option>
+                              <option selected disabled>
+                                Tidak ada sesi tersedia
+                              </option>
                             )}
                           </select>
                         </div>
@@ -188,10 +219,18 @@ export const ModalBookingJadwalMendadakPasien = ({ fetch, idPasien, dokter }) =>
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button onClick={onClose} className="bg-transparent text-[#DC2626] font-semibold text-sm">
+                <Button
+                  onClick={onClose}
+                  className="bg-transparent text-[#DC2626] font-semibold text-sm"
+                >
                   Batal
                 </Button>
-                <Button onClick={handleBookingDadakanPasien} className="text-white bg-red-600" isLoading={loading} spinnerPlacement="end">
+                <Button
+                  onClick={handleBookingDadakanPasien}
+                  className="text-white bg-red-600"
+                  isLoading={loading}
+                  spinnerPlacement="end"
+                >
                   Simpan
                 </Button>
               </ModalFooter>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input } from "@nextui-org/react";
+import { Input, Spinner } from "@nextui-org/react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -9,15 +9,17 @@ import { verifyOTP, regenerateOTP } from "@/services/auth";
 
 export const Verifikasi_otpForm = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const [form, setForm] = useState({
     otp: "",
   });
 
   const handleOTPChange = (e) => {
     const inputValue = e.target.value;
-    const numericValue = inputValue.replace(/\D/g, '');
+    const numericValue = inputValue.replace(/\D/g, "");
     const formattedValue = numericValue.slice(0, 4);
-    
+
     setForm((prevForm) => ({
       ...prevForm,
       otp: formattedValue,
@@ -26,42 +28,60 @@ export const Verifikasi_otpForm = () => {
 
   const verfikasiOTP = async (e) => {
     e.preventDefault();
+    setLoading(true);
     if (form.otp.length !== 4) {
       toast.error("OTP harus terdiri dari 4 digit");
+      setLoading(false);
       return;
     }
     try {
-      const res = await verifyOTP(form.otp);
-      if (res.status === "true") {
-        toast.success(res.message);
-        router.push("/ganti-password");
-      } else {
-        if (res.error instanceof Object) {
-          for (const key in res.error) {
-            toast.error(res.error[key]);
+      await toast.promise(
+        verifyOTP(form.otp).then(async (res) => {
+          if (res.status === "true") {
+            return Promise.resolve(res);
+          } else {
+            return Promise.reject(res);
           }
-        } else throw new Error(res.error);
-      }
-    } catch (error) {
-      toast.error(error.message);
+        }),
+        {
+          loading: "Memverifikasi...",
+          success: async (res) => {
+            if (res.status === "true") {
+              router.push("/ganti-password");
+              return res.message;
+            }
+          },
+          error: (err) => err.message,
+        }
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   const resendOTP = async (e) => {
     e.preventDefault();
+    setDisabled(true);
     try {
-      const res = await regenerateOTP('all');
-      if (res.status === "true") {
-        toast.success(res.message);
-      } else {
-        if (res.error instanceof Object) {
-          for (const key in res.error) {
-            toast.error(res.error[key]);
+      await toast.promise(regenerateOTP("all").then(
+        async (res) => {
+          if (res.status === "true") {
+            return Promise.resolve(res);
+          } else {
+            return Promise.reject(res);
           }
-        } else throw new Error(res.error);
-      }
-    } catch (error) {
-      toast.error(error.message);
+        }
+      ), {
+        loading: "Mengirim ulang OTP...",
+        success: async (res) => {
+          if (res.status === "true") {
+            return res.message;
+          }
+        },
+        error: (err) => err.message,
+      }); 
+    } finally {
+      setDisabled(false);
     }
   };
 
@@ -119,6 +139,7 @@ export const Verifikasi_otpForm = () => {
                   <button
                     onClick={resendOTP}
                     className="text-indigo-500 hover:underline font-bold"
+                    disabled={disabled}
                   >
                     {" "}
                     Kirim Ulang!
@@ -129,9 +150,19 @@ export const Verifikasi_otpForm = () => {
               <div className="col-span-6 sm:flex sm:items-center sm:gap-4">
                 <button
                   onClick={verfikasiOTP}
-                  className="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
+                  className="group inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
                 >
-                  Verifikasi
+                  {loading ? (
+                    <div className="flex items-center">
+                      <Spinner
+                        size="sm"
+                        className="mr-2 group-hover:text-blue-600 text-white"
+                      />
+                      Memverifikasi...
+                    </div>
+                  ) : (
+                    "Verifikasi"
+                  )}
                 </button>
               </div>
             </div>

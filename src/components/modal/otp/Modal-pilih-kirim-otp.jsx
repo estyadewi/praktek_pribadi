@@ -17,43 +17,58 @@ import Cookies from "js-cookie";
 export const ModalPilihKirimOTP = ({ isAgree, form }) => {
   const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [isLoading, setIsLoading] = useState(false); // State untuk loading
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = async () => {
-    setIsLoading(true); // Mulai loading
+    setIsLoading(true);
     try {
-      const res = await validateRegister(form);
-      if (res.status === "true") {
-        onOpen();
-      } else {
-        if (res.error instanceof Object) {
-          for (const key in res.error) {
-            toast.error(res.error[key]);
+      await toast.promise(validateRegister(form).then(
+        async (res) => {
+          if (res.status === "true") {
+            return Promise.resolve(res);
+          } else {
+            return Promise.reject(res);
           }
-        } else throw new Error(res.error);
-      }
-    } catch (error) {
-      toast.error(error.message);
+        }
+      ), {
+        loading: "Memvalidasi data...",
+        success: async (res) => {
+          if (res.status === "true") {
+            onOpen();
+            return "Pilih metode pengiriman OTP";
+          }
+        },
+        error: (err) => err.message,
+      });
     } finally {
-      setIsLoading(false); // Selesai loading
+      setIsLoading(false);
     }
   };
 
   const handleRegister = async (sendBy) => {
-    setIsLoading(true); // Mulai loading
+    setIsLoading(true);
     try {
-      const res = await register(form, sendBy);
-      if (res.status === "true") {
-        toast.success(res.message);
-        Cookies.set("activation-token", res.token);
-        router.push(`/aktivasi-akun?otp=${sendBy}`);
-      } else {
-        toast.error(res.error);
-      }
-    } catch (error) {
-      toast.error(error.message);
+      await toast.promise(register(form, sendBy).then(
+        async (res) => {
+          if (res.status === "true") {
+            return Promise.resolve(res);
+          } else {
+            return Promise.reject(res);
+          }
+        }
+      ), {
+        loading: "Mendaftar...",
+        success: async (res) => {
+          if (res.status === "true") {
+            Cookies.set("activation-token", res.token);
+            router.push(`/aktivasi-akun?otp=${sendBy}`);
+            return res.message;
+          }
+        },
+        error: (err) => err.message,
+      });
     } finally {
-      setIsLoading(false); // Selesai loading
+      setIsLoading(false);
     }
   };
 

@@ -62,19 +62,24 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
                 waktu_selesai: item.waktu_selesai.slice(0, 5),
             }));
             const data = { tanggal: tanggalData, sesi: updatedSesi };
-            const res = await updateJadwalDadakan(data, id);
-            if (res.status === 'success') {
-                toast.success(res.message);
-                router.replace('/admin/jadwal-praktek');
-            } else {
-                if (typeof res.error === 'object') {
-                    Object.values(res.error).forEach(error => toast.error(error));
-                } else {
-                    throw new Error(res.error);
+            await toast.promise(updateJadwalDadakan(data, id).then(
+                async (res) => {
+                    if (res.status === 'success') {
+                        return Promise.resolve(res);
+                    } else {
+                        return Promise.reject(res.error);
+                    }
                 }
-            }
-        } catch (error) {
-            toast.error(error.message);
+            ),{
+                loading: 'Menyimpan...',
+                success: async (res) => {
+                    if (res.status === 'success') {
+                        toast.success(res.message);
+                        router.replace('/admin/jadwal-praktek');
+                    } 
+                },
+                error: (err) => err.error,
+            });
         } finally {
             setLoading(false);
         }
@@ -132,6 +137,7 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
                                     </label>
                                     <Input
                                         value={tanggalData}
+                                        disabled={loading}
                                         type="date"
                                         id='tanggal'
                                         variant="bordered"
@@ -153,7 +159,7 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
                                         }}
                                     />
                                 </div>
-                                <Checkbox className='mt-2' onChange={handleCheckboxChange} isSelected={isDisabled}>
+                                <Checkbox className='mt-2' onChange={handleCheckboxChange} isSelected={isDisabled} isDisabled={loading}>
                                     <span className='text-xs sm:text-sm font-medium text-slate-700 whitespace-nowrap'>Tidak Ada Praktek</span>
                                 </Checkbox>
                             </div>
@@ -179,7 +185,7 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
                                 </div>
 
                                 <div>
-                                    <Button className='bg-orange-500 text-white w-full disabled:opacity-80' onClick={handleAddSesi} disabled={isDisabled}>
+                                    <Button className='bg-orange-500 text-white w-full disabled:opacity-80 disabled:cursor-not-allowed' onClick={handleAddSesi} disabled={isDisabled || loading}>
                                         Tambah Slot
                                     </Button>
                                 </div>
@@ -199,6 +205,7 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
                                         <Input
                                             id={`waktu_mulai_${index}`}
                                             type="time"
+                                            disabled={loading}
                                             variant="bordered"
                                             name="waktu_mulai"
                                             size="md"
@@ -218,6 +225,7 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
                                         <Input
                                             id={`waktu_selesai_${index}`}
                                             type="time"
+                                            disabled={loading}
                                             variant="bordered"
                                             name="waktu_selesai"
                                             size="md"
@@ -237,6 +245,7 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
                                         <Input
                                             id={`kuota_${index}`}
                                             type="number"
+                                            disabled={loading}
                                             variant="bordered"
                                             name="kuota"
                                             size="md"
@@ -250,7 +259,7 @@ export const UbahSesiJadwalDadakan = ({tanggal}) => {
                                         />
                                     </div>
                                     <div className='grid grid-cols-3 mt-6 sm:mt-7'>
-                                        <Button className='text-white bg-[#EF4444] w-full disabled:opacity-80' onClick={() => handleRemoveSesi(index)} disabled={sesi.length === 1}>
+                                        <Button className='text-white bg-[#EF4444] w-full disabled:opacity-80 disabled:cursor-not-allowed' onClick={() => handleRemoveSesi(index)} disabled={sesi.length === 1 || loading}>
                                             Hapus
                                         </Button>
                                     </div>

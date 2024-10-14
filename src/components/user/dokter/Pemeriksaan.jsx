@@ -143,7 +143,7 @@ export const PemeriksaanDokterPage = () => {
         </Card>
 
         <div className="mt-4">
-          {loading || isNavigating ? ( // Check both loading and navigating
+          {loading || isNavigating ? (
             <div className="flex justify-center items-center min-h-[222px]">
               <Spinner size="lg" />
             </div>

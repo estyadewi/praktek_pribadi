@@ -171,7 +171,7 @@ export const ArtikelPage = () => {
                 <TableColumn>Judul</TableColumn>
                 <TableColumn>Aksi</TableColumn>
               </TableHeader>
-              <TableBody items={items} emptyContent={"Tidak Ada Layanan"}>
+              <TableBody items={items} emptyContent={"Tidak Ada Artikel"}>
                 {items.map((item, index) => (
                   <TableRow key={item.id}>
                     <TableCell>

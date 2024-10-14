@@ -75,19 +75,24 @@ export const UbahSesiJadwalHarian = ({ hari }) => {
         waktu_mulai: item.waktu_mulai.slice(0, 5),
         waktu_selesai: item.waktu_selesai.slice(0, 5),
       }));
-      const res = await updateSesiHarian(updatedSesi, id);
-      if (res.status === "success") {
-        toast.success(res.message);
-        router.replace("/admin/jadwal-praktek");
-      } else {
-        if (typeof res.error === "object") {
-          Object.values(res.error).forEach((error) => toast.error(error));
-        } else {
-          throw new Error(res.error);
+      await toast.promise(updateSesiHarian(updatedSesi, id).then(
+        async (res) => {
+          if (res.status === "success") {
+            return Promise.resolve(res);
+          } else {
+            return Promise.reject(res);
+          }
         }
-      }
-    } catch (error) {
-      toast.error(error.message);
+      ), {
+        loading: "Menyimpan...",
+        success: async (res) => {
+          if (res.status === "success") {
+            router.replace("/admin/jadwal-praktek");
+            return res.message;
+          }
+        },
+        error: (err) => err.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -174,6 +179,7 @@ export const UbahSesiJadwalHarian = ({ hari }) => {
                     className="mt-1"
                     onChange={handleCheckboxChange}
                     isSelected={isDisabled}
+                    isDisabled={loading}
                   >
                     <span className="text-xs sm:text-sm font-medium text-slate-700 whitespace-nowrap">
                       Tidak Ada Praktek
@@ -183,9 +189,9 @@ export const UbahSesiJadwalHarian = ({ hari }) => {
 
                 <div>
                   <Button
-                    className="bg-orange-500 text-white w-full sm:mb-2 mb-4 disabled:opacity-80"
+                    className="bg-orange-500 text-white w-full sm:mb-2 mb-4 disabled:opacity-80 disabled:cursor-not-allowed"
                     onClick={handleAddSesi}
-                    disabled={isDisabled}
+                    disabled={isDisabled || loading}
                   >
                     Tambah Slot
                   </Button>
@@ -217,6 +223,7 @@ export const UbahSesiJadwalHarian = ({ hari }) => {
                     </label>
                     <Input
                       type="time"
+                      disabled={loading}
                       variant="bordered"
                       name="waktu_mulai"
                       size="md"
@@ -238,6 +245,7 @@ export const UbahSesiJadwalHarian = ({ hari }) => {
                     </label>
                     <Input
                       type="time"
+                      disabled={loading}
                       variant="bordered"
                       name="waktu_selesai"
                       size="md"
@@ -259,6 +267,7 @@ export const UbahSesiJadwalHarian = ({ hari }) => {
                     </label>
                     <Input
                       type="number"
+                      disabled={loading}
                       variant="bordered"
                       name="kuota"
                       size="md"
@@ -273,9 +282,9 @@ export const UbahSesiJadwalHarian = ({ hari }) => {
                   </div>
                   <div className="grid grid-cols-3 mt-6 sm:mt-0 sm:mb-2">
                     <Button
-                      className="text-white bg-[#EF4444] w-full disabled:opacity-80"
+                      className="text-white bg-[#EF4444] w-full disabled:opacity-80 disabled:cursor-not-allowed"
                       onClick={() => handleRemoveSesi(index)}
-                      disabled={sesi.length === 1}
+                      disabled={sesi.length === 1 || loading}
                     >
                       Hapus
                     </Button>
