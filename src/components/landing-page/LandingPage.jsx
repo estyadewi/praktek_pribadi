@@ -27,8 +27,8 @@ const AnimatedSection = ({ children }) => {
 export const LandingPage = () => {
   return (
     <>
-      <div className="bg-[#E1EEFF] min-h-[calc(100vh-64px)] flex items-center justify-center">
-        <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full py-8">
+      <div className="bg-[#E1EEFF] h-[90vh] content-center">
+        <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="flex flex-col items-center justify-between py-8 lg:py-20 ">
             <div className="w-full flex flex-col md:flex-row items-center md:gap-10">
               <motion.div

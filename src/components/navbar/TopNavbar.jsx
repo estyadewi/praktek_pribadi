@@ -27,7 +27,7 @@ export const TopNavbar = () => {
     <Navbar
       onMenuOpenChange={setIsMenuOpen}
       isMenuOpen={isMenuOpen}
-      className="h-auto py-2 sm:h-[10vh]"
+      className="py-2 top-0 sticky"
       maxWidth="xl"
     >
       <NavbarContent>
