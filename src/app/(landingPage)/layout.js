@@ -3,10 +3,10 @@ import { Footer } from "@/components/footer/Footer";
 
 export default function LandingPageLayout({ children }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <section className="flex flex-col min-h-screen">
       <TopNavbar />
       <main className="flex-grow">{children}</main>
       <Footer />
-    </div>
+    </section>
   );
 }
