@@ -88,7 +88,7 @@ export const LoginForm = () => {
             <h1 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
               Selamat datang di <br />
               <Link href="/" className="font-bold text-blue-700">
-                Praktek Pribadi
+                Klinik dr. Estya
               </Link>{" "}
               🩺
             </h1>

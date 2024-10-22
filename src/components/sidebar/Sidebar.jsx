@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { MdOutlineLogout } from "react-icons/md";
 import Link from "next/link";
@@ -13,75 +13,69 @@ import { createSlug } from "@/lib/constants";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [items, setItems] = useState([]);
-  const [data, setData] = useState([]);
+  const [userData, setUserData] = useState(null);
   const router = useRouter();
   const currentPath = usePathname();
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  const toggleSidebar = useCallback(() => setIsOpen((prev) => !prev), []);
+  const closeSidebar = useCallback(() => setIsOpen(false), []);
 
-  const closeSidebar = () => {
-    setIsOpen(false);
-  };
+  const logoutUser = useCallback(async () => {
+    const authToken = Cookies.get("auth-token");
+    if (!authToken) return;
 
-  const logoutUser = async () => {
-    const auth_token = Cookies.get("auth-token");
-    if (auth_token) {
-      const res = await logout(auth_token);
-      if (res.status === "true") {
-        toast.success(res.message);
-        Cookies.remove("auth-token");
-        router.replace("/masuk");
-      } else {
-        toast.error(res.error);
-      }
+    const res = await logout(authToken);
+    if (res.status === "true") {
+      toast.success(res.message);
+      Cookies.remove("auth-token");
+      router.replace("/masuk");
+    } else {
+      toast.error(res.error);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
-    const fetchRole = async () => {
-      const auth_token = Cookies.get("auth-token");
-      if (auth_token) {
-        const res = await cekToken(auth_token);
-        setData(res);
-        if (res.role === "Pasien") {
-          setItems(sidebarItems.Pasien);
-        } else if (res.role === "Dokter") {
-          setItems(sidebarItems.Dokter);
-        } else if (res.role === "Admin") {
-          setItems(sidebarItems.Admin);
-        } else if (res.role === "Super User") {
-          setItems(sidebarItems.Super_User);
-        }
-      }
+    const fetchUserRole = async () => {
+      const authToken = Cookies.get("auth-token");
+      if (!authToken) return;
+
+      const res = await cekToken(authToken);
+      setUserData(res);
     };
-    fetchRole();
+
+    fetchUserRole();
   }, []);
+
+  const items = useMemo(() => {
+    if (!userData) return [];
+    return sidebarItems[userData.role] || [];
+  }, [userData]);
 
   return (
     <>
+      {/* Mobile Header */}
       <div className="md:hidden top-0 z-50 bg-white shadow-sm p-4 flex justify-end">
         <button onClick={toggleSidebar} aria-label="Toggle Sidebar">
           <GiHamburgerMenu className="text-2xl text-slate-500" />
         </button>
       </div>
 
+      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-sm border-r transition-transform transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 md:static md:inset-y-auto md:h-screen`}
       >
         <div className="flex flex-col h-full">
+          {/* Logo and Dashboard Link */}
           <div className="p-4 pb-2 flex justify-center items-center">
             <Link
-              href={`/${createSlug(data.role ?? "-")}/dashboard`}
+              href={`/${createSlug(userData?.role ?? "-")}/dashboard`}
               className="text-2xl text-center font-bold border-b border-gray-100 pb-4 w-full"
               onClick={closeSidebar}
             >
-              🩺<span className="text-slate-700">Praktek</span>
-              <span className="text-indigo-500"> Pribadi</span>
+              🩺<span className="text-slate-700">Klinik</span>
+              <span className="text-indigo-500"> dr. Estya</span>
             </Link>
           </div>
 
@@ -109,14 +103,14 @@ const Sidebar = () => {
             </ul>
           </div>
 
-          {/* Footer (Logout and user info) */}
+          {/* Footer (Logout and User Info) */}
           <div className="border-t p-3">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm text-gray-800 font-semibold">
-                  {data.nama}
+                  {userData?.nama}
                 </h3>
-                <p className="text-xs text-gray-600">{data.role}</p>
+                <p className="text-xs text-gray-600">{userData?.role}</p>
               </div>
               <button onClick={logoutUser} aria-label="Logout" className="p-2">
                 <MdOutlineLogout className="text-2xl text-gray-600" />

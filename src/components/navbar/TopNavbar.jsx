@@ -35,10 +35,10 @@ export const TopNavbar = () => {
           <div className="flex justify-center items-center">
             <Link
               href="/"
-              className="text-lg sm:text-2xl text-center font-bold w-full"
+              className="text-lg sm:text-2xl text-center font-bold w-full gap-1"
             >
-              🩺<span className="text-slate-700">Praktek</span>
-              <span className="text-indigo-500"> Pribadi</span>
+              🩺<span className="text-slate-700">Klinik</span>
+              <span className="text-indigo-500">dr. Estya</span>
             </Link>
           </div>
         </NavbarBrand>
