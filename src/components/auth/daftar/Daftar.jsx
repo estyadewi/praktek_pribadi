@@ -67,7 +67,7 @@ export const RegisterForm = () => {
               🩺
             </h1>
 
-            <div className="mt-8 grid grid-cols-7 gap-3 h-full">
+            <div className="mt-8 grid grid-cols-6 gap-3 h-full">
               <div className="col-span-6">
                 <label
                   htmlFor="nama"
