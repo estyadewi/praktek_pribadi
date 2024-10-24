@@ -2,7 +2,7 @@ import { FaHome, FaClipboardList, FaUserMd, FaUserTie, FaBriefcaseMedical, FaPil
 import { GrArticle } from "react-icons/gr";
 
 export const sidebarItems = {
-    Super_User: [
+    "Super User": [
         {
             label: "Dashboard",
             href: "/super-user/dashboard",

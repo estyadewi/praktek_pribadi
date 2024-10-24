@@ -38,7 +38,7 @@ export const ModalPilihKirimOTP = ({ isAgree, form }) => {
             return "Pilih metode pengiriman OTP";
           }
         },
-        error: (err) => err.message,
+        error: (err) => err.error,
       });
     } finally {
       setIsLoading(false);
@@ -65,7 +65,7 @@ export const ModalPilihKirimOTP = ({ isAgree, form }) => {
             return res.message;
           }
         },
-        error: (err) => err.message,
+        error: (err) => err.error,
       });
     } finally {
       setIsLoading(false);

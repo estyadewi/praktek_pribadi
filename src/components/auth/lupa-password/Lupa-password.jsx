@@ -57,7 +57,7 @@ export const LupaPasswordForm = () => {
             return res.message;
           }
         },
-        error: (err) => err.message,
+        error: (err) => err.error,
       });
     } finally {
       setLoading(false);
