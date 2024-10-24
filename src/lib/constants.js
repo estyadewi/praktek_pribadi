@@ -1,5 +1,5 @@
-export const API_URL = "https://api.klinik-drestya.com/api";
-export const API_IMG = "https://api.klinik-drestya.com/storage/";
+export const API_URL = "https://api.panjip.my.id//api";
+export const API_IMG = "https://api.panjip.my.id//storage/";
 
 export const createSlug = (str) => {
   return str.toLowerCase().trim().replace(/[\s_-]+/g, "-").replace(/[^\w\-]+/g, "").replace(/\-\-+/g, "-").replace(/^-+/, "").replace(/-+$/, "");
