@@ -71,7 +71,7 @@ export const SuratKeteranganSakit = ({ data, tanggal, onClose }) => {
               Jl. HOS Cokroaminoto No.32, Pakuncen, Wirobrajan, Kota Yogyakarta,
               Daerah Istimewa Yogyakarta 55253
             </p>
-            <p className="text-xs">Telp: 0818-0950-7311</p>
+            <p className="text-xs">Telp: 0821-3704-9037</p>
           </div>
 
           <div className="border border-black my-2"></div>
