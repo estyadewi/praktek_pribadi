@@ -44,7 +44,7 @@ export const ModalDetailPasien = ({ data }) => {
                   <p className="font-semibold">No RM</p>
                   <p>
                     {": "}
-                    {data.id}
+                    {data.nomor_rm}
                   </p>
 
                   <p className="font-semibold">Nama</p>
