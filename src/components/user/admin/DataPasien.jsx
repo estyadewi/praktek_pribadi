@@ -148,7 +148,7 @@ export const DataPasienPage = () => {
                                             <ModalDetailPasien data={item}/>
                                             <ModalUbahPasien pasien={item} fetch={fetchData}/>
                                             <ModalBookingJadwalMendadakPasien fetch={fetchData} idPasien={item.id} dokter={dokter}/>
-                                            <ModalTambahHistoryLama/>
+                                            <ModalTambahHistoryLama idPasien={item.id}/>
                                         </TableCell>
 
                                     </TableRow>

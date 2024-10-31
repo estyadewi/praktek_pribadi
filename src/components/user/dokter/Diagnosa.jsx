@@ -305,7 +305,7 @@ export const DiagnosaPasienPage = ({ noRM }) => {
                     <div className='flex flex-row gap-1'>
                       <ModalHistoryPasien idPasien={pasien.id} />
                       <span className='text-slate-700 text-sm'>|</span>
-                      <ModalHistoryPasienManual idPasien={pasien.id}/>
+                      <ModalHistoryPasienManual rekam_medis={pasien.rekam_medis}/>
                     </div>
                   </div>
                   <div className="flex flex-col mt-2 gap-3">

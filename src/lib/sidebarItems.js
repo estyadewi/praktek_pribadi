@@ -115,6 +115,11 @@ export const sidebarItems = {
       href: "/admin/artikel",
       icon: GrArticle,
     },
+    {
+      label: "Jadwal Mendatang",
+      href: "/admin/jadwal-mendatang",
+      icon: FaCalendarCheck,
+    },
   ],
 
   Pasien: [

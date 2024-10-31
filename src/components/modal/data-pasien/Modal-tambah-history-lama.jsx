@@ -8,15 +8,17 @@ import {
   Button,
   useDisclosure,
   Tooltip,
-  Image,
-  Input,
 } from "@nextui-org/react";
-import { FaHistory, FaCloudUploadAlt } from "react-icons/fa";
+import { FaHistory } from "react-icons/fa";
+import { addHistoryManual } from "@/services/data-pasien";
+import { toast } from "react-hot-toast";
 
-export const ModalTambahHistoryLama = () => {
+export const ModalTambahHistoryLama = ({idPasien}) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [preview, setPreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const formData = new FormData();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -38,6 +40,25 @@ export const ModalTambahHistoryLama = () => {
       window.open(preview.url, "_blank");
     }
   };
+
+  const handleAddHistory = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      formData.append("rekam_medis", selectedFile);
+      const res = await addHistoryManual(idPasien, formData);
+      if (res.status === "true") {
+        toast.success(res.message);
+        handleCloseModal();
+      } else {
+        toast.error(res.error);
+      }
+    } catch (error) {
+      return error;
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <>
@@ -64,59 +85,6 @@ export const ModalTambahHistoryLama = () => {
                 Tambah History Lama
               </ModalHeader>
               <ModalBody>
-                {/* <div>
-                  <label
-                    htmlFor="gambar"
-                    className="block text-sm font-medium text-slate-700 mb-2"
-                  >
-                    File <span className="text-red-700">*</span>
-                  </label>
-
-                  <label className="border-[2px] border-dashed flex justify-center items-center w-full h-40 rounded-2xl max-w-full">
-                    <input
-                      className="sr-only"
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={handleImageChange}
-                    />
-                    {preview ? (
-                      <>
-                        {preview.type === "application/pdf" ? (
-                          // <embed
-                          //   src={preview.url}
-                          //   type="application/pdf"
-                          //   className="object-cover max-h-40 w-full max-w-full rounded-lg"
-                          // />
-                          <iframe
-                            src={preview.url}
-                            className="object-cover max-h-40 w-full max-w-full rounded-lg"
-                            title="PDF Preview"
-                          ></iframe>
-                        ) : (
-                          <Image
-                            isZoomed
-                            src={preview.url}
-                            alt="preview"
-                            className="object-cover max-h-40 w-full max-w-full rounded-lg"
-                          />
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex flex-col justify-center items-center">
-                          <FaCloudUploadAlt
-                            size={32}
-                            className="text-gray-400"
-                          />
-                          <p className="text-medium text-gray-400 text-center">
-                            Unggah File (Maksimal 2MB, Format: JPG, JPEG, PNG,
-                            PDF. Minimal Ukuran Jika Gambar: 1280 x 720 piksel)
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </label>
-                </div> */}
                 <div className="flex flex-col">
                   <label
                     htmlFor="gambar"
@@ -156,7 +124,7 @@ export const ModalTambahHistoryLama = () => {
                 >
                   Batal
                 </Button>
-                <Button onClick={onClose} className="text-white bg-orange-500">
+                <Button onClick={handleAddHistory} className="text-white bg-orange-500" isLoading={loading} spinnerPlacement="end" isDisabled={selectedFile == null}>
                   Simpan
                 </Button>
               </ModalFooter>

@@ -189,3 +189,22 @@ export async function insertBookingDadakanPasien(data){
         return error;
     }
 }
+
+export async function addHistoryManual(idPasien, formData){
+    try {
+        const token = Cookies.get("auth-token");
+        const response = await fetch(`${API_URL}/admin/tambah-rm/${idPasien}`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+        });
+        console.log(response);
+        const res = await response.json();
+        return res;
+    } catch (error) {
+        return error;
+    }
+}
+

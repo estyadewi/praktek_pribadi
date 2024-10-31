@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, use } from "react";
 import {
   Breadcrumbs,
   BreadcrumbItem,
@@ -17,9 +17,10 @@ import {
   Spinner,
 } from "@nextui-org/react";
 import { FaHome } from "react-icons/fa";
-import { getPasienJadwalMendatangDokter } from "@/services/pemeriksaan";
+import { getJadwalMendatangAdmin } from "@/services/pemeriksaan";
+import { getDokterTersedia } from "@/services/jadwal-praktek";
 
-export const JadwalMendatangPage = () => {
+export const JadwalMendatangAdminPage = () => {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,8 @@ export const JadwalMendatangPage = () => {
       timeZone: "Asia/Jakarta",
     }).format(new Date())
   );
+  const [selectedDokter, setSelectedDokter] = useState(null);
+  const [dokter, setDokter] = useState([]);
   const rowsPerPage = 5;
 
   const pages = Math.ceil(data.length / rowsPerPage);
@@ -38,17 +41,34 @@ export const JadwalMendatangPage = () => {
     return data.slice(start, end);
   }, [page, data]);
 
+  const fetchDokter = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getDokterTersedia();
+      setDokter(res);
+      setSelectedDokter(res[0]?.id || null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getPasienJadwalMendatangDokter(tanggal);
+      const res = await getJadwalMendatangAdmin(selectedDokter, tanggal);
       setData(res);
     } catch (error) {
       return error;
     } finally {
       setLoading(false);
     }
-  }, [tanggal]);
+  }, [selectedDokter, tanggal]);
+
+  useEffect(() => {
+    fetchDokter();
+  }, [fetchDokter]);
 
   useEffect(() => {
     fetchData();
@@ -62,6 +82,10 @@ export const JadwalMendatangPage = () => {
 
   const handleTanggalChange = (e) => {
     setTanggal(e.target.value);
+  };
+
+  const handleChangeDokter = (e) => {
+    setSelectedDokter(e.target.value);
   };
 
   return (
@@ -87,7 +111,30 @@ export const JadwalMendatangPage = () => {
       <div>
         <Card className="w-full mt-8" radius="sm">
           <CardBody>
-            <div className="justify-between items-center hidden sm:flex">
+            <div className="justify-between items-center hidden lg:flex">
+              <div>
+                <select
+                  name="dokter"
+                  id="dokter"
+                  value={selectedDokter || 1}
+                  onChange={handleChangeDokter}
+                  className="h-10 w-full md:w-64 rounded-md border-r-8 border-transparent px-3 text-sm outline-1 outline outline-slate-200 shadow-sm hover:outline-slate-400 focus:outline-slate-400 focus:shadow-outline-slate-200"
+                >
+                  {dokter.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      dr. {item.nama} (Spesialis {item.spesialisasi})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <div className="border shadow-sm p-2 rounded-md">
+                  <p className="text-slate-700 text-medium">
+                    Jumlah Pasien Booking:{" "}
+                    <span className="font-semibold">{data.length || 0}</span>
+                  </p>
+                </div>
+              </div>
               <div className="w-48">
                 <Input
                   type="date"
@@ -105,16 +152,23 @@ export const JadwalMendatangPage = () => {
                   }}
                 />
               </div>
-              <div>
-                <div className="border shadow-sm p-2 rounded-md">
-                  <p className="text-slate-700 text-medium">
-                    Jumlah Pasien Booking:{" "}
-                    <span className="font-semibold">{data.length || 0}</span>
-                  </p>
-                </div>
-              </div>
             </div>
-            <div className="flex flex-col gap-3 items-center sm:hidden">
+            <div className="flex flex-col gap-3 items-center lg:hidden">
+            <div className="w-full">
+                <select
+                  name="dokter"
+                  id="dokter"
+                  value={selectedDokter || 1}
+                  onChange={handleChangeDokter}
+                  className="h-10 w-full rounded-md border-r-8 border-transparent px-3 text-sm outline-1 outline outline-slate-200 shadow-sm hover:outline-slate-400 focus:outline-slate-400 focus:shadow-outline-slate-200"
+                >
+                  {dokter.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      dr. {item.nama} (Spesialis {item.spesialisasi})
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="w-full">
                 <Input
                   type="date"
