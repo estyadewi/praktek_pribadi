@@ -109,9 +109,9 @@ export const ModalHistoryPasien = ({ idPasien }) => {
                           {item.assessment}
                         </TableCell>
                         <TableCell>
-                          {item.penggunaan_obat && item.resep
+                          {item.penggunaan_obat.length!=0 && item.resep
                             ? "Diberikan Obat dan Resep"
-                            : item.penggunaan_obat
+                            : item.penggunaan_obat.length!=0
                             ? "Diberikan Obat"
                             : item.resep
                             ? "Diberikan Resep"

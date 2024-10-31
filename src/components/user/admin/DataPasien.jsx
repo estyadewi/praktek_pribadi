@@ -7,6 +7,7 @@ import { getDataPasien } from "@/services/data-pasien";
 import { ModalTambahPasien } from "@/components/modal/data-pasien/Modal-tambah-pasien";
 import { ModalDetailPasien } from "@/components/modal/data-pasien/Modal-detail-pasien";
 import { ModalUbahPasien } from "@/components/modal/data-pasien/Modal-ubah-pasien";
+import { ModalTambahHistoryLama } from "@/components/modal/data-pasien/Modal-tambah-history-lama";
 import { ModalBookingJadwalMendadakPasien } from "@/components/modal/data-pasien/Modal-booking-jadwal-mendadak";
 import { getDokterTersedia } from "@/services/jadwal-praktek";
 
@@ -141,12 +142,13 @@ export const DataPasienPage = () => {
                                     <TableRow key={item.id}>
                                         <TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
                                         <TableCell>{getKeyValue(item, "nomor_rm")}</TableCell>
-                                        <TableCell>{getKeyValue(item.user, "nama")}</TableCell>
+                                        <TableCell className="whitespace-nowrap">{getKeyValue(item.user, "nama")}</TableCell>
                                         <TableCell>{"0" + String(getKeyValue(item.user, "nomor")).replace(/^0+/, "")}</TableCell>
                                         <TableCell className="flex flex-row space-x-2 md:space-y-0">
                                             <ModalDetailPasien data={item}/>
                                             <ModalUbahPasien pasien={item} fetch={fetchData}/>
                                             <ModalBookingJadwalMendadakPasien fetch={fetchData} idPasien={item.id} dokter={dokter}/>
+                                            <ModalTambahHistoryLama/>
                                         </TableCell>
 
                                     </TableRow>

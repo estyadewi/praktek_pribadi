@@ -18,6 +18,7 @@ import { FaHome } from "react-icons/fa";
 import { getLayananByDokter } from "@/services/layanan";
 import { getAllObat } from "@/services/obat";
 import { ModalHistoryPasien } from "@/components/modal/pemeriksaan/Modal-riwayat-pasien";
+import { ModalHistoryPasienManual } from '@/components/modal/pemeriksaan/Modal-riwayat-pasien-manual';
 import { getPasienByNoRM } from "@/services/data-pasien";
 import { formatDate } from "@/lib/constants";
 import {
@@ -301,7 +302,11 @@ export const DiagnosaPasienPage = ({ noRM }) => {
                       Pemeriksaan Awal (Subjektif){" "}
                       <span className="text-red-700">*</span>
                     </p>
-                    <ModalHistoryPasien idPasien={pasien.id} />
+                    <div className='flex flex-row gap-1'>
+                      <ModalHistoryPasien idPasien={pasien.id} />
+                      <span className='text-slate-700 text-sm'>|</span>
+                      <ModalHistoryPasienManual idPasien={pasien.id}/>
+                    </div>
                   </div>
                   <div className="flex flex-col mt-2 gap-3">
                     <div className="flex flex-row gap-3">

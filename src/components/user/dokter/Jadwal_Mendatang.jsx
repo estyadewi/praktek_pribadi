@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Breadcrumbs,
@@ -17,45 +16,30 @@ import {
   getKeyValue,
   Spinner,
 } from "@nextui-org/react";
-import { FaHome, FaSearch } from "react-icons/fa";
-import { getLayananByDokter } from "@/services/layanan";
-import { ModalTambahLayanan } from "@/components/modal/layanan/Modal-tambah-layanan";
-import { ModalHapusLayanan } from "@/components/modal/layanan/Modal-hapus-layanan";
-import { ModalUbahLayanan } from "@/components/modal/layanan/Modal-ubah-layanan";
-import { formatRupiah } from "@/lib/constants";
-
-export const LayananPage = () => {
+import { FaHome } from "react-icons/fa";
+export const JadwalMendatangPage = () => {
   const [data, setData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [tanggal, setTanggal] = useState(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Jakarta",
+    }).format(new Date())
+  );
   const rowsPerPage = 5;
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-    setPage(1);
-  };
-
-  const filteredData = useMemo(() => {
-    return data
-      .filter((item) => item.is_active === 1)
-      .filter((item) =>
-        item.nama.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-  }, [searchTerm, data]);
-
-  const pages = Math.ceil(filteredData.length / rowsPerPage);
+  const pages = Math.ceil(data.length / rowsPerPage);
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    return filteredData.slice(start, end);
-  }, [page, filteredData]);
+    return data.slice(start, end);
+  }, [page, data]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getLayananByDokter();
+    //   const res = await getLayananByDokter();
       setData(res);
     } catch (error) {
       return error;
@@ -72,7 +56,11 @@ export const LayananPage = () => {
     if (page > pages && pages > 0) {
       setPage(pages);
     }
-  }, [filteredData, page, pages]);
+  }, [data, page, pages]);
+
+  const handleTanggalChange = (e) => {
+    setTanggal(e.target.value);
+  };
 
   return (
     <div className="p-6">
@@ -89,7 +77,9 @@ export const LayananPage = () => {
         >
           Dashboard
         </BreadcrumbItem>
-        <BreadcrumbItem className="font-normal">Layanan</BreadcrumbItem>
+        <BreadcrumbItem className="font-normal">
+          Jadwal Mendatang
+        </BreadcrumbItem>
       </Breadcrumbs>
 
       <div>
@@ -97,32 +87,56 @@ export const LayananPage = () => {
           <CardBody>
             <div className="justify-between items-center hidden sm:flex">
               <div>
-                <ModalTambahLayanan fetch={fetchData} />
+                <Input
+                  type="date"
+                  radius="sm"
+                  value={tanggal}
+                  onChange={handleTanggalChange}
+                  min={new Intl.DateTimeFormat("en-CA", {
+                    timeZone: "Asia/Jakarta",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  }).format(new Date())}
+                  classNames={{
+                    inputWrapper: "border",
+                  }}
+                />
               </div>
               <div>
-                <Input
-                  type="text"
-                  startContent={<FaSearch className="text-slate-500" />}
-                  radius="sm"
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  placeholder="Cari berdasarkan nama layanan"
-                />
+                <div className="border shadow-sm p-2 rounded-md">
+                  <p className="text-slate-700 text-medium">
+                    Jumlah Pasien Booking:{" "}
+                    <span className="font-semibold">80</span>
+                  </p>
+                </div>
               </div>
             </div>
             <div className="flex flex-col gap-3 items-center sm:hidden">
-              <div className="w-full">
+            <div className="w-full">
                 <Input
-                  type="text"
-                  startContent={<FaSearch className="text-slate-500" />}
+                  type="date"
                   radius="sm"
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  placeholder="Cari berdasarkan nama layanan"
+                  value={tanggal}
+                  onChange={handleTanggalChange}
+                  min={new Intl.DateTimeFormat("en-CA", {
+                    timeZone: "Asia/Jakarta",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  }).format(new Date())}
+                  classNames={{
+                    inputWrapper: "border",
+                  }}
                 />
               </div>
               <div className="w-full">
-                <ModalTambahLayanan fetch={fetchData} />
+                <div className="border shadow-sm p-2 rounded-md">
+                  <p className="text-slate-700 text-medium text-center">
+                    Jumlah Pasien Booking:{" "}
+                    <span className="font-semibold">80</span>
+                  </p>
+                </div>
               </div>
             </div>
           </CardBody>
@@ -135,7 +149,7 @@ export const LayananPage = () => {
             </div>
           ) : (
             <Table
-              aria-label="Tabel Layanan"
+              aria-label="Tabel Pasien Booking"
               bottomContent={
                 <div className="flex w-full justify-center">
                   <Pagination
@@ -155,29 +169,25 @@ export const LayananPage = () => {
             >
               <TableHeader>
                 <TableColumn>No</TableColumn>
+                <TableColumn>Nomor RM</TableColumn>
                 <TableColumn>Nama</TableColumn>
-                <TableColumn>Harga</TableColumn>
-                <TableColumn>Deskripsi</TableColumn>
-                <TableColumn>Aksi</TableColumn>
+                <TableColumn>No Telpon</TableColumn>
               </TableHeader>
-              <TableBody items={items} emptyContent={"Tidak Ada Layanan"}>
+              <TableBody
+                items={items}
+                emptyContent={"Tidak Ada Pasien Booking"}
+              >
                 {items.map((item, index) => (
                   <TableRow key={item.nama}>
                     <TableCell>
                       {(page - 1) * rowsPerPage + index + 1}
                     </TableCell>
-                    <TableCell className="truncate whitespace-nowrap overflow-hidden max-w-[150px] md:max-w-none">
-                      {getKeyValue(item, "nama")}
+                    <TableCell>{/* {getKeyValue(item, "nama")} */}</TableCell>
+                    <TableCell>
+                      {/* {formatRupiah(getKeyValue(item, "harga"))} */}
                     </TableCell>
                     <TableCell>
-                      {formatRupiah(getKeyValue(item, "harga"))}
-                    </TableCell>
-                    <TableCell className="text-ellipsis max-w-xs overflow-hidden whitespace-nowrap">
-                      {getKeyValue(item, "deskripsi")}
-                    </TableCell>
-                    <TableCell className="flex flex-row space-x-2 md:space-y-0">
-                      <ModalHapusLayanan id={item.id} fetch={fetchData} />
-                      <ModalUbahLayanan id={item.id} fetch={fetchData} />
+                      {/* {getKeyValue(item, "deskripsi")} */}
                     </TableCell>
                   </TableRow>
                 ))}
