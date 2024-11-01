@@ -11,7 +11,7 @@ import {
   Button,
 } from "@nextui-org/react";
 import { FaHome, FaImage } from "react-icons/fa";
-import 'react-quill/dist/quill.snow.css';
+import "react-quill/dist/quill.snow.css";
 import dynamic from "next/dynamic";
 import { updateArtikel, getArtikelById } from "@/services/artikel";
 import toast from "react-hot-toast";
@@ -66,12 +66,14 @@ export const UbahArtikel = ({ id }) => {
       }
       formData.append("_method", "PUT");
       for (let key in data) {
-        formData.append(key, data[key]); 
+        formData.append(key, data[key]);
       }
       const res = await updateArtikel(id, formData);
       if (res.status === "success") {
         toast.success(res.message);
-        router.replace(path.startsWith("/dokter") ? "/dokter/artikel" : "/admin/artikel");
+        router.replace(
+          path.startsWith("/dokter") ? "/dokter/artikel" : "/admin/artikel"
+        );
       } else {
         if (res.error instanceof Object) {
           for (const key in res.error) {
@@ -111,11 +113,21 @@ export const UbahArtikel = ({ id }) => {
       >
         <BreadcrumbItem
           startContent={<FaHome className="text-2xl" />}
-          href={path.startsWith("/dokter") ? "/dokter/dashboard" : "/admin/dashboard"}
+          href={
+            path.startsWith("/dokter")
+              ? "/dokter/dashboard"
+              : "/admin/dashboard"
+          }
         >
           Dashboard
         </BreadcrumbItem>
-        <BreadcrumbItem href={path.startsWith("/dokter") ? "/dokter/artikel" : "/admin/artikel"}>Artikel</BreadcrumbItem>
+        <BreadcrumbItem
+          href={
+            path.startsWith("/dokter") ? "/dokter/artikel" : "/admin/artikel"
+          }
+        >
+          Artikel
+        </BreadcrumbItem>
         <BreadcrumbItem className="font-normal">Ubah Artikel</BreadcrumbItem>
       </Breadcrumbs>
 
@@ -172,7 +184,8 @@ export const UbahArtikel = ({ id }) => {
                       <div className="flex flex-col justify-center items-center">
                         <FaImage size={32} className="text-gray-400" />
                         <p className="text-[14px] text-gray-400">
-                          Unggah Thumbnail
+                          Unggah Thumbnail (Maksimal 2MB, Format: JPG, JPEG,
+                          PNG. Minimal Ukuran: 1280 x 720 piksel)
                         </p>
                       </div>
                     </>

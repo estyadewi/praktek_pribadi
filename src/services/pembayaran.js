@@ -1,7 +1,7 @@
 import { API_URL } from "@/lib/constants";
 import Cookies from "js-cookie";
 
-export const getPembayaranPasien = async () => {
+export async function getPembayaranPasien () {
     try {
         const token = Cookies.get("auth-token");
         const response = await fetch(`${API_URL}/admin/pembayaran`, {

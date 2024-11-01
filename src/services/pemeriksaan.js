@@ -247,3 +247,37 @@ export async function adminBatalkanJanjiPasien(idPemeriksaan){
         return error;
     }
 }
+
+export async function getPasienJadwalMendatangDokter(tanggal){
+    try {
+        const token = Cookies.get("auth-token");
+        const response = await fetch(`${API_URL}/dokter/pemeriksaan-mendatang/${tanggal}`, {
+            method: "GET",
+            headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const res = await response.json();
+        return res.data;
+    } catch (error) {
+        return error;
+    }
+}
+
+export async function getJadwalMendatangAdmin(idDokter, tanggal){
+    try {
+        const token = Cookies.get("auth-token");
+        const response = await fetch(`${API_URL}/admin/pemeriksaan-mendatang/${idDokter}/${tanggal}`, {
+            method: "GET",
+            headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const res = await response.json();
+        return res.data;
+    } catch (error) {
+        return error;
+    }
+}

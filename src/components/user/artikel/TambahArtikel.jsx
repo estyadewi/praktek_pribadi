@@ -152,7 +152,7 @@ export const TambahArtikel = () => {
                       <div className="flex flex-col justify-center items-center">
                         <FaImage size={32} className="text-gray-400" />
                         <p className="text-[14px] text-gray-400">
-                          Unggah Thumbnail
+                          Unggah Thumbnail (Maksimal 2MB, Format: JPG, JPEG, PNG. Minimal Ukuran: 1280 x 720 piksel)
                         </p>
                       </div>
                     </>
