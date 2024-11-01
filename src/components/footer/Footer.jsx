@@ -36,10 +36,10 @@ export const Footer = () => {
                   0821-3704-9037
                 </ContactItem>
                 <ContactItem
-                  href="mailto:dr.estyadewiwidyasari@gmail.com"
+                  href="mailto:klinik.drestya@gmail.com"
                   icon={FaEnvelope}
                 >
-                  dr.estyadewiwidyasari@gmail.com
+                  klinik.drestya@gmail.com
                 </ContactItem>
                 <ContactItem
                   href="https://www.instagram.com/praktek_dr.estya/"

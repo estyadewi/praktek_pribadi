@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { FaHeartbeat, FaCommentMedical, FaCapsules } from "react-icons/fa";
-import { BiMaleFemale } from "react-icons/bi";
+import { FaHeartbeat, FaCommentMedical, FaDna, FaStethoscope } from "react-icons/fa";
 import { LayananCard } from "../Card/LayananCard";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
@@ -52,12 +51,12 @@ export const LandingPage = () => {
                 <h1 className="text-[#021526] font-bold text-3xl sm:text-4xl lg:text-5xl mb-4 text-left">
                   Prakter Dokter
                   <br />
-                  <span className="text-indigo-500">dr. Estya Dewi W</span>
+                  <span className="text-indigo-500">dr Estya Dewi, SpOG</span>
                 </h1>
                 <p className="text-sm lg:text-md text-slate-600 mb-6 text-justify">
-                  Menjaga Kesehatan dan Kenyamanan Ibu dan Bayi. Kami hadir
-                  untuk mendukung perjalanan Anda sebagai calon ibu dengan
-                  layanan kesehatan komprehensif.
+                  Kami menyediakan layanan pemeriksaan dan konsultasi
+                  komprehensif di bidang kandungan dan kebidanan untuk mendukung
+                  kesehatan dan kenyamanan Anda selama perjalanan kehamilan.
                 </p>
                 <div className="flex justify-start space-x-4 sm:space-x-0">
                   <Link href="/masuk">
@@ -84,7 +83,7 @@ export const LandingPage = () => {
           </div>
         </div>
       </div>
-      
+
       <AnimatedSection>
         <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-8">
           <h1 className="font-bold text-3xl sm:text-4xl text-slate-700 mb-6">
@@ -93,26 +92,26 @@ export const LandingPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <LayananCard
               icon={FaHeartbeat}
-              title="USG"
-              description="Prosedur medis non-invasif menggunakan gelombang suara untuk menghasilkan gambar organ tubuh."
+              title="USG Kandungan"
+              description="USG transabdominal untuk memeriksa kesehatan organ reproduksi dan perkembangan janin, serta USG transvaginal untuk analisis detail pada usia kehamilan muda."
               isBlue={false}
             />
             <LayananCard
               icon={FaCommentMedical}
               title="Konsultasi"
-              description="Konsultasi profesional untuk membahas kesehatan reproduksi dan perencanaan kehamilan."
+              description="Kami menyediakan konsultasi untuk skrining kesehatan organ reproduksi, perencanaan kehamilan, dan pemilihan alat KB yang tepat."
               isBlue={true}
             />
             <LayananCard
-              icon={BiMaleFemale}
-              title="Uji Kesuburan"
-              description="Evaluasi menyeluruh untuk mengidentifikasi faktor-faktor yang memengaruhi kesuburan."
+              icon={FaDna}
+              title="Skrining DNA HPV"
+              description="Prosedur ini bertujuan untuk mendeteksi virus HPV, penyebab kanker serviks dan mulut rahim."
               isBlue={false}
             />
             <LayananCard
-              icon={FaCapsules}
-              title="Suplemen"
-              description="Suplemen berkualitas tinggi untuk memenuhi kebutuhan nutrisi selama kehamilan."
+              icon={FaStethoscope}
+              title="Papsmear"
+              description="Kami menawarkan Papsmear untuk deteksi dini kanker serviks dengan menggunakan metode liquid-based cytology, yang memberikan hasil lebih teliti."
               isBlue={true}
             />
           </div>
@@ -134,14 +133,14 @@ export const LandingPage = () => {
             </div>
             <div className="w-full lg:w-1/2 lg:pr-12 mt-8 lg:mt-0">
               <h1 className="text-slate-700 font-bold text-2xl sm:text-3xl lg:text-4xl mb-4 text-left">
-                dr. Estya Dewi W, Sp. OG
+                dr Estya Dewi, SpOG
               </h1>
               <p className="text-sm lg:text-medium text-slate-700 mb-6 text-justify">
-                Dokter Kandungan yang berpengalaman dalam bidang kesehatan
-                reproduksi dan kehamilan. Menyelesaikan pendidikan kedokteran di
-                Universitas Gadjah Mada dan telah bekerja di berbagai rumah sakit
-                ternama di Indonesia. Memiliki sertifikasi dan pelatihan khusus
-                dalam bidang kesehatan reproduksi dan kesuburan.
+                Dokter spesialis Obstetri dan Ginekologi yang menamatkan
+                pendidikan di Universitas Gadjah Mada pada tahun 2013. Saat ini
+                bekerja di RS Siloam dan RS Panti Rapih Yogyakarta, dengan
+                pengalaman luas dalam menangani kesehatan reproduksi, kehamilan,
+                dan kesuburan.
               </p>
             </div>
           </div>
